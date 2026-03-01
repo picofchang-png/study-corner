@@ -397,7 +397,7 @@
         }
 
         function goHome() { saveCurrentFolder(); document.getElementById('dashboard').style.display = 'block'; document.getElementById('lab-interface').style.display = 'none'; updateDashboard(); }
-        function saveToLocal() { localStorage.setItem('speakingLab_folders', JSON.stringify(folders)); scSchedulePush(); }
+        function saveToLocal() { localStorage.setItem('speakingLab_folders', JSON.stringify(folders)); if (!scIsPulling) scSchedulePush(); }
         function checkStreak() { if (streakData.lastDate) { const diff = (new Date().setHours(0,0,0,0) - new Date(streakData.lastDate).setHours(0,0,0,0)) / 86400000; if (diff > 1) { streakData.current = 0; saveToLocal(); } } }
         function updateStreakOnStudy() { const today = new Date().toDateString(); if (streakData.lastDate !== today) { streakData.current = (streakData.lastDate && (new Date().setHours(0,0,0,0) - new Date(streakData.lastDate).setHours(0,0,0,0))/86400000 === 1) ? streakData.current + 1 : 1; streakData.lastDate = today; if (streakData.current > streakData.best) streakData.best = streakData.current; localStorage.setItem('speakingLab_streak', JSON.stringify(streakData)); } }
         function deleteFolder(e, id) { e.stopPropagation(); if(confirm('Delete Topic?')) { folders = folders.filter(f => f.id !== id); saveToLocal(); updateDashboard(); } }
@@ -510,7 +510,8 @@
             } catch(e) { scSetStatus('error', 'Sync lỗi'); }
         }
         async function scPull() {
-            if (!scToken || !scGistId) return;
+            if (!scToken || !scGistId || scPulling) return;
+            scPulling = true; scIsPulling = true;
             scSetStatus('syncing', 'Loading...');
             try {
                 const res = await fetch(`https://api.github.com/gists/${scGistId}`, {
@@ -524,11 +525,11 @@
             if (d['speakingLab_folders'] !== undefined) { localStorage.setItem('speakingLab_folders', typeof d['speakingLab_folders'] === 'string' ? d['speakingLab_folders'] : JSON.stringify(d['speakingLab_folders'])); }
             if (d['speakingLab_streak'] !== undefined) { localStorage.setItem('speakingLab_streak', typeof d['speakingLab_streak'] === 'string' ? d['speakingLab_streak'] : JSON.stringify(d['speakingLab_streak'])); }
                     scSetStatus('synced', 'Synced ✓');
-                    location.reload();
+                    if (typeof updateDashboard === "function") { folders = JSON.parse(localStorage.getItem("speakingLab_folders")) || []; updateDashboard(); }
                 } else {
                     scSetStatus('synced', 'Gist trống');
                 }
-            } catch(e) { scSetStatus('error', 'Load lỗi'); }
+            } catch(e) { scSetStatus('error', 'Load lỗi'); } finally { scPulling = false; scIsPulling = false; }
         }
         function scSchedulePush() {
             if (!scToken || !scGistId) return;
