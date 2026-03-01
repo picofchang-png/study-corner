@@ -525,7 +525,7 @@
             if (d['speakingLab_folders'] !== undefined) { localStorage.setItem('speakingLab_folders', typeof d['speakingLab_folders'] === 'string' ? d['speakingLab_folders'] : JSON.stringify(d['speakingLab_folders'])); }
             if (d['speakingLab_streak'] !== undefined) { localStorage.setItem('speakingLab_streak', typeof d['speakingLab_streak'] === 'string' ? d['speakingLab_streak'] : JSON.stringify(d['speakingLab_streak'])); }
                     scSetStatus('synced', 'Synced ✓');
-                    if (typeof updateDashboard === "function") { folders = JSON.parse(localStorage.getItem("speakingLab_folders")) || []; updateDashboard(); }
+                    // Data loaded into localStorage - user will see it on next interaction
                 } else {
                     scSetStatus('synced', 'Gist trống');
                 }
