@@ -401,7 +401,7 @@
             }
         });
 
-        function saveToLocal() { localStorage.setItem(STORAGE_KEY, JSON.stringify(folders)); scSchedulePush(); }
+        function saveToLocal() { localStorage.setItem(STORAGE_KEY, JSON.stringify(folders)); if (!scIsPulling) scSchedulePush(); }
         function goHome() { saveCurrentFolder(); document.getElementById('dashboard').style.display = 'block'; document.getElementById('lab-interface').style.display = 'none'; updateDashboard(); undoStack = []; }
         function toggleImportant(btn) { saveToUndoStack(); const block = btn.closest('.essay-block'); const isImp = block.classList.toggle('important'); btn.classList.toggle('active', isImp); btn.innerText = isImp ? '★' : '☆'; saveCurrentFolder(); saveToUndoStack(); }
         function deleteFolder(e, id) { e.stopPropagation(); if(confirm('Delete?')) { folders = folders.filter(x => x.id !== id); saveToLocal(); updateDashboard(); } }
@@ -547,7 +547,8 @@
             } catch(e) { scSetStatus('error', 'Sync lỗi'); }
         }
         async function scPull() {
-            if (!scToken || !scGistId) return;
+            if (!scToken || !scGistId || scPulling) return;
+            scPulling = true; scIsPulling = true;
             scSetStatus('syncing', 'Loading...');
             try {
                 const res = await fetch(`https://api.github.com/gists/${scGistId}`, {
@@ -561,11 +562,11 @@
             if (d['WritingLab_Stable_Data'] !== undefined) { localStorage.setItem('WritingLab_Stable_Data', typeof d['WritingLab_Stable_Data'] === 'string' ? d['WritingLab_Stable_Data'] : JSON.stringify(d['WritingLab_Stable_Data'])); }
             if (d['WritingLab_Streak_Data'] !== undefined) { localStorage.setItem('WritingLab_Streak_Data', typeof d['WritingLab_Streak_Data'] === 'string' ? d['WritingLab_Streak_Data'] : JSON.stringify(d['WritingLab_Streak_Data'])); }
                     scSetStatus('synced', 'Synced ✓');
-                    location.reload();
+                    if (typeof updateDashboard === "function") { folders = JSON.parse(localStorage.getItem("WritingLab_Stable_Data")) || []; updateDashboard(); }
                 } else {
                     scSetStatus('synced', 'Gist trống');
                 }
-            } catch(e) { scSetStatus('error', 'Load lỗi'); }
+            } catch(e) { scSetStatus('error', 'Load lỗi'); } finally { scPulling = false; scIsPulling = false; }
         }
         function scSchedulePush() {
             if (!scToken || !scGistId) return;
