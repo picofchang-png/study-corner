@@ -985,7 +985,7 @@ function submitSR(level, wordOverride) {
     case 3: p.interval = p.interval === 0 ? 4 : Math.round(p.interval * 4); break;
   }
   if (p.interval > 0) { const d = new Date(); d.setDate(d.getDate() + p.interval); p.nextReview = d.getTime(); }
-  localStorage.setItem('lexis_sr', JSON.stringify(sr_data)); scSchedulePush();
+  localStorage.setItem('lexis_sr', JSON.stringify(sr_data)); if (!scIsPulling) scSchedulePush();
   if (!wordOverride) {
     if (isReviewMode && level > 0) {
       reviewQueue.splice(currentIndex, 1);
@@ -1765,7 +1765,8 @@ renderGameBests();
             } catch(e) { scSetStatus('error', 'Sync lỗi'); }
         }
         async function scPull() {
-            if (!scToken || !scGistId) return;
+            if (!scToken || !scGistId || scPulling) return;
+            scPulling = true; scIsPulling = true;
             scSetStatus('syncing', 'Loading...');
             try {
                 const res = await fetch(`https://api.github.com/gists/${scGistId}`, {
@@ -1784,11 +1785,11 @@ renderGameBests();
             if (d['lexis_scores'] !== undefined) { localStorage.setItem('lexis_scores', typeof d['lexis_scores'] === 'string' ? d['lexis_scores'] : JSON.stringify(d['lexis_scores'])); }
             if (d['lexis_streak'] !== undefined) { localStorage.setItem('lexis_streak', typeof d['lexis_streak'] === 'string' ? d['lexis_streak'] : JSON.stringify(d['lexis_streak'])); }
                     scSetStatus('synced', 'Synced ✓');
-                    location.reload();
+                    if (typeof renderFolders === "function") { sr_data = JSON.parse(localStorage.getItem("lexis_sr")) || {}; views = JSON.parse(localStorage.getItem("lexis_views")) || {}; activityLog = JSON.parse(localStorage.getItem("lexis_activity")) || {}; highScores = JSON.parse(localStorage.getItem("lexis_scores")) || {}; renderFolders(); renderStats(); renderHeatmap(); renderGameBests(); displayStreak(); }
                 } else {
                     scSetStatus('synced', 'Gist trống');
                 }
-            } catch(e) { scSetStatus('error', 'Load lỗi'); }
+            } catch(e) { scSetStatus('error', 'Load lỗi'); } finally { scPulling = false; scIsPulling = false; }
         }
         function scSchedulePush() {
             if (!scToken || !scGistId) return;
