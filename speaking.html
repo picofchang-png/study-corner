@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speaking Lab</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎙</text></svg>">
+    
+    <style>
+        :root {
+            --bg-gradient: radial-gradient(circle, #fff0f3 0%, #f7d1d7 100%);
+            --accent-color: #ff8fa3;
+            --yellow: #fff2ac;
+            --blue: #d1eaff;
+            --pink: #ffd1dc;
+            --red-text: #e74c3c;
+            --text-color: #4a4a4a;
+            --color-p1: #ff8fa3; --color-p2: #70e000; --color-p3: #4cc9f0; --color-comm: #9d4edd; 
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-gradient); color: var(--text-color); margin: 0; padding: 10px 20px; min-height: 100vh; position: relative; padding-bottom: 50px; }
+        .watermark { position: fixed; bottom: 15px; left: 20px; font-size: 14px; color: rgba(0,0,0,0.15); font-family: 'Dancing Script', 'Brush Script MT', cursive; pointer-events: none; z-index: 999; }
+
+        #dashboard { max-width: 1100px; margin: 0 auto; position: relative; }
+        .streak-container { position: absolute; top: 0; right: 0; display: flex; gap: 10px; z-index: 10; }
+        .streak-card { background: white; padding: 5px 12px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); font-size: 13px; font-weight: bold; border: 1px solid rgba(255,143,163,0.2); }
+        .streak-val { color: var(--accent-color); }
+
+        .lab-header { text-align: center; margin-bottom: 20px; padding-top: 5px; }
+        .lab-header h1 { font-size: 1.8rem; margin: 0; color: var(--accent-color); font-weight: 800; text-shadow: 1px 1px 0px #fff; }
+        
+        .controls-row { display: flex; justify-content: center; gap: 15px; max-width: 800px; margin: 10px auto 25px; flex-wrap: wrap; }
+        .search-container { position: relative; flex: 2; min-width: 300px; }
+        #searchInput, #filterType { padding: 10px 20px; border-radius: 25px; border: 2px solid #fff; outline: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        #searchInput { width: 100%; box-sizing: border-box; }
+        
+        .search-results { position: absolute; top: 45px; left: 0; right: 0; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1000; display: none; max-height: 400px; overflow-y: auto; }
+        .search-item { padding: 12px 20px; border-bottom: 1px solid #f9f9f9; cursor: pointer; }
+        .search-item:hover { background: #fffafb; }
+        .search-item b { display: block; color: var(--accent-color); font-size: 14px; }
+        .search-item i { font-size: 12px; color: #888; display: block; margin-top: 3px; font-style: normal; }
+        .search-part-tag { font-size: 10px; font-weight: 800; color: #ccc; text-transform: uppercase; margin-left: 5px; border: 1px solid #eee; padding: 1px 4px; border-radius: 4px; }
+
+        .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .folder-card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); cursor: pointer; position: relative; border-top: 6px solid #ddd; }
+        .folder-card.part-1 { border-top-color: var(--color-p1); }
+        .folder-card.part-2 { border-top-color: var(--color-p2); }
+        .folder-card.part-3 { border-top-color: var(--color-p3); }
+        .folder-card.communication { border-top-color: var(--color-comm); }
+        
+        .delete-btn { position: absolute; top: 10px; right: 10px; background: #f1f1f1; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; color: #999; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .delete-btn:hover { background: #ffebeb; color: #e74c3c; }
+
+        .clear-q-btn { position: absolute; top: 10px; right: 42px; background: #f1f1f1; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-size: 14px; color: #999; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .clear-q-btn:hover { background: #fff0f0; color: var(--red-text); }
+
+        .folder-meta { font-size: 11px; color: #888; margin-top: 15px; display: flex; align-items: center; gap: 5px; }
+
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; text-align: center; width: 320px; }
+        .modal-btn { display: block; width: 100%; padding: 12px; margin: 10px 0; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; color: white; }
+
+        #lab-interface { display: none; flex-direction: column; align-items: center; }
+        .header { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 1100px; margin-bottom: 20px; background: rgba(255, 255, 255, 0.6); padding: 12px 25px; border-radius: 20px; backdrop-filter: blur(10px); box-sizing: border-box; }
+        .topic-input { font-size: 18px; border: none; border-bottom: 2px solid rgba(255,143,163,0.3); outline: none; width: 70%; background: transparent; }
+
+        .question-block { background: white; padding: 25px; border-radius: 20px; margin-bottom: 20px; position: relative; width: 100%; max-width: 1100px; box-sizing: border-box; box-shadow: 0 5px 20px rgba(0,0,0,0.03); counter-increment: q-idx; }
+        .q-idx-label::before { content: "QUESTION " counter(q-idx); color: var(--accent-color); font-size: 11px; font-weight: 800; }
+        .comm-mode .q-idx-label::before { content: "DIALOGUE " counter(q-idx); color: var(--color-comm); }
+        
+        .box-label { display: block; font-size: 11px; font-weight: 800; margin-bottom: 8px; color: #bbb; text-transform: uppercase; }
+        .question-box, .editor-box { width: 100%; min-height: 2.2em; padding: 10px 15px; border: 1.5px solid #f8f8f8; border-radius: 10px; box-sizing: border-box; outline: none; line-height: 1.5; }
+        .question-box { margin-bottom: 15px; font-size: 16px; font-weight: 500; background: #fafafa; }
+        
+        .content-row { display: flex; gap: 15px; margin-bottom: 10px; align-items: flex-start; }
+        .side-col { display: flex; flex-direction: column; gap: 15px; flex: 1; }
+
+        .add-row-btn { background: #f8f8f8; border: 1.5px dashed #ddd; width: 100%; padding: 10px; border-radius: 12px; cursor: pointer; color: #999; font-weight: bold; transition: 0.2s; margin-top: 10px; }
+        .add-row-btn:hover { background: #fff; border-color: var(--color-comm); color: var(--color-comm); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+        .fab { position: fixed; background: var(--accent-color); color: white; border: none; border-radius: 50%; cursor: pointer; z-index: 101; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(255,143,163,0.4); }
+        .add-btn-main { bottom: 25px; right: 25px; width: 50px; height: 50px; font-size: 22px; }
+        .back-btn { bottom: 25px; right: 25px; width: 50px; height: 50px; background: #4a4a4a; font-size: 22px; }
+        .help-btn { bottom: 85px; right: 25px; width: 50px; height: 50px; background: #9bb1ff; font-size: 22px; }
+
+        .shortcuts-panel { position: fixed; bottom: 145px; right: 25px; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: none; z-index: 100; min-width: 180px; }
+        .shortcut-item { display: flex; align-items: center; margin-bottom: 8px; gap: 10px; font-size: 13px; }
+        .key-cap { background: #eee; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-family: monospace; }
+
+        /* ── SYNC UI ── */
+        .sc-sync-bar{position:fixed;bottom:18px;left:18px;display:flex;align-items:center;gap:7px;z-index:9999}
+        .sc-sync-btn{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.82);border:1px solid rgba(0,0,0,0.07);border-radius:20px;padding:3px 10px;font-size:11px;color:#aaa;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.06);backdrop-filter:blur(8px);transition:background 0.2s}
+        .sc-sync-btn:hover{background:rgba(255,255,255,1)}
+        .sc-dot{width:6px;height:6px;border-radius:50%;background:#ccc;flex-shrink:0}
+        .sc-dot.synced{background:#51cf66}.sc-dot.syncing{background:#fab005;animation:sc-pulse 1s infinite}.sc-dot.error{background:#ff6b6b}
+        @keyframes sc-pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+        .sc-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:10000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+        .sc-modal{background:white;border-radius:20px;padding:26px 28px;width:390px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.15)}
+        .sc-modal h3{margin:0 0 4px;font-size:16px}.sc-modal p{font-size:12px;color:#aaa;margin:0 0 14px}
+        .sc-input{width:100%;padding:9px 12px;border:2px solid #f0f0f0;border-radius:10px;font-size:13px;font-family:monospace;outline:none;margin-bottom:8px;box-sizing:border-box}
+        .sc-input:focus{border-color:#74c0fc}
+        .sc-save-btn{width:100%;padding:11px;border:none;border-radius:12px;background:#339af0;color:white;font-weight:bold;font-size:14px;cursor:pointer}
+        .sc-save-btn:hover{background:#228be6}
+        .sc-hint{font-size:11px;color:#bbb;margin-top:10px;line-height:1.65}.sc-hint a{color:#339af0}
+        .sc-skip{display:block;text-align:center;font-size:12px;color:#ccc;margin-top:8px;cursor:pointer}.sc-skip:hover{color:#aaa}
+        .color-circle { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+
+    <div class="sc-sync-bar">
+        <div class="sc-sync-btn" onclick="scOpenModal()">
+            <div class="sc-dot" id="scDot"></div>
+            <span id="scLabel">Sync</span>
+        </div>
+    </div>
+    <div class="sc-modal-overlay" id="scModal">
+        <div class="sc-modal">
+            <h3>☁️ Cloud Sync</h3>
+            <p>Token &amp; Gist ID dùng chung cho tất cả các trang</p>
+            <input class="sc-input" id="scTokenInput" type="password" placeholder="GitHub Personal Access Token" autocomplete="off">
+            <input class="sc-input" id="scGistInput" type="text" placeholder="Gist ID (để trống để tạo mới)" autocomplete="off">
+            <button class="sc-save-btn" onclick="scSaveConfig()">💾 Lưu &amp; Kết nối</button>
+            <p class="sc-hint">📌 Token: <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens</a> → scope <b>gist</b><br>📌 Gist ID: lấy từ URL gist sau khi tạo lần đầu</p>
+            <span class="sc-skip" onclick="scCloseModal()">Bỏ qua</span>
+        </div>
+    </div>
+    <div class="watermark">cloudofdecember</div>
+
+    <div id="dashboard">
+        <div class="streak-container">
+            <div class="streak-card">🔥 <span id="currentStreak" class="streak-val">0</span></div>
+            <div class="streak-card">🏆 <span id="bestStreak" class="streak-val">0</span></div>
+        </div>
+        <div class="lab-header"><h1><span>🌟</span>Speaking Lab<span>🌟</span></h1></div>
+        <div class="controls-row">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search Topic or Question..." oninput="handleSearch()">
+                <div id="searchResults" class="search-results"></div>
+            </div>
+            <select id="filterType" onchange="updateDashboard()">
+                <option value="All">All Parts</option>
+                <option value="Part 1">Part 1</option>
+                <option value="Part 2">Part 2</option>
+                <option value="Part 3">Part 3</option>
+                <option value="Communication">Communication</option>
+            </select>
+        </div>
+        <div class="folder-grid" id="folderGrid"></div>
+        <button class="fab add-btn-main" onclick="showPartModal()">+</button>
+    </div>
+
+    <div id="partModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="margin-top:0">Select Part</h3>
+            <button class="modal-btn" style="background:var(--color-p1)" onclick="createNewFolder('Part 1')">Part 1</button>
+            <button class="modal-btn" style="background:var(--color-p2)" onclick="createNewFolder('Part 2')">Part 2</button>
+            <button class="modal-btn" style="background:var(--color-p3)" onclick="createNewFolder('Part 3')">Part 3</button>
+            <button class="modal-btn" style="background:var(--color-comm)" onclick="createNewFolder('Communication')">Communication</button>
+            <button class="modal-btn" style="background:#eee; color:#666" onclick="closePartModal()">Cancel</button>
+        </div>
+    </div>
+
+    <div id="lab-interface">
+        <button class="fab help-btn" onclick="toggleHelp()">?</button>
+        <button class="fab back-btn" onclick="goHome()">🏠</button>
+        <div id="shortcuts" class="shortcuts-panel">
+            <h4 style="margin:0 0 10px 0; font-size: 14px;">⌨️ Guidelines</h4>
+            <div class="shortcut-item"><span class="key-cap">Z</span> <div class="color-circle" style="background:var(--yellow)"></div> Yellow</div>
+            <div class="shortcut-item"><span class="key-cap">A</span> <div class="color-circle" style="background:var(--blue)"></div> Blue</div>
+            <div class="shortcut-item"><span class="key-cap">Q</span> <div class="color-circle" style="background:var(--pink)"></div> Pink</div>
+            <div class="shortcut-item"><span class="key-cap">D</span> <div class="color-circle" style="background: white; border: 1px solid red; color: red; font-size: 10px; font-weight: bold; width:14px; text-align:center">T</div> Red Text</div>
+        </div>
+        <div class="header">
+            <div style="flex:1; display:flex; align-items:center; gap:12px">
+                <strong id="displayPart" style="color: var(--accent-color); font-size: 11px; border: 1.5px solid; padding: 3px 8px; border-radius: 10px;">PART 1</strong>
+                <input type="text" id="topicInput" class="topic-input" placeholder="Topic name...">
+            </div>
+            <button onclick="addNewQuestion()" style="padding: 8px 15px; border-radius: 12px; border: none; background: var(--accent-color); color: white; cursor: pointer; font-weight: bold; font-size: 13px;">+ Add Question</button>
+        </div>
+        <div id="main-container" style="width: 100%; max-width: 1100px; counter-reset: q-idx;"></div>
+    </div>
+
+    <script>
+        let folders = JSON.parse(localStorage.getItem('speakingLab_folders')) || [];
+        let currentFolderId = null;
+        let streakData = JSON.parse(localStorage.getItem('speakingLab_streak')) || { current: 0, best: 0, lastDate: null };
+
+        function updateDashboard() {
+            const grid = document.getElementById('folderGrid');
+            const filterValue = document.getElementById('filterType').value;
+            grid.innerHTML = '';
+            const filtered = filterValue === "All" ? folders : folders.filter(f => f.type === filterValue);
+            filtered.forEach(folder => {
+                const card = document.createElement('div');
+                const typeClass = folder.type.toLowerCase().replace(" ", "-");
+                card.className = `folder-card ${typeClass}`;
+                card.onclick = () => openFolder(folder.id);
+                card.innerHTML = `<button class="delete-btn" onclick="deleteFolder(event, '${folder.id}')">×</button>
+                    <div style="font-weight:bold">${folder.topic || 'Untitled Topic'}</div>
+                    <div class="folder-meta">
+                        <span style="color:var(--color-${typeClass.split('-')[0]}); font-weight:800">${folder.type}</span>
+                        <span>-</span><span>${folder.questions.length}Q</span>
+                        <span>-</span><span style="color:#bbb">${folder.date || 'N/A'}</span>
+                    </div>`;
+                grid.appendChild(card);
+            });
+            checkStreak();
+            document.getElementById('currentStreak').innerText = streakData.current;
+            document.getElementById('bestStreak').innerText = streakData.best;
+        }
+
+        function handleAutoExpand(el) {
+            el.style.height = 'auto';
+            el.style.height = (el.scrollHeight) + 'px';
+            saveCurrentFolder();
+        }
+
+        function createCommRow(aContent = '', bContent = '') {
+            const row = document.createElement('div');
+            row.className = 'content-row';
+            row.innerHTML = `
+                <div style="flex:1">
+                    <span class="box-label">👧 A</span>
+                    <div class="editor-box" contenteditable="true" oninput="handleAutoExpand(this)">${aContent}</div>
+                </div>
+                <div style="flex:1">
+                    <span class="box-label">👦 B</span>
+                    <div class="editor-box" contenteditable="true" oninput="handleAutoExpand(this)">${bContent}</div>
+                </div>
+                <button class="delete-btn" style="position:static; align-self:center; margin-top:20px" onclick="this.parentElement.remove(); saveCurrentFolder();">×</button>
+            `;
+            return row;
+        }
+
+        function createQuestionBlock(type, data = { q: '', g: '', b: '', a: '', rows: [] }) {
+            const div = document.createElement('div'); 
+            div.className = 'question-block' + (type === 'Communication' ? ' comm-mode' : '');
+            
+            let innerHtml = `
+                <button class="clear-q-btn" onclick="clearDataOnly(this)" title="Clear Content">🗑️</button>
+                <button class="delete-btn" onclick="if(confirm('Delete block?')){this.parentElement.remove(); saveCurrentFolder();}">×</button>
+                <span class="box-label q-idx-label"></span>
+                <div class="question-box" contenteditable="true" oninput="handleAutoExpand(this)" placeholder="${type === 'Communication' ? 'Context/Topic...' : 'Question...'}">${data.q || ''}</div>
+                <div class="rows-container"></div>
+            `;
+
+            if (type === 'Communication') {
+                div.innerHTML = innerHtml + `<button class="add-row-btn" onclick="addCommRowToBlock(this)">+ Add Dialogue Row</button>`;
+                const container = div.querySelector('.rows-container');
+                if (data.rows && data.rows.length > 0) {
+                    data.rows.forEach(r => container.appendChild(createCommRow(r.a, r.b)));
+                } else {
+                    container.appendChild(createCommRow());
+                }
+            } else if (type === 'Part 2') {
+                div.innerHTML = innerHtml + `
+                    <div class="content-row">
+                        <div class="side-col">
+                            <div><span class="box-label">📑 Cue Card</span><div class="editor-box" contenteditable="true" oninput="handleAutoExpand(this)">${data.g || ''}</div></div>
+                            <div><span class="box-label">💡 Brainstorm</span><div class="editor-box" contenteditable="true" oninput="handleAutoExpand(this)">${data.b || ''}</div></div>
+                        </div>
+                        <div style="flex:2"><span class="box-label">✍️ Answer</span><div class="editor-box" contenteditable="true" oninput="handleAutoExpand(this)">${data.a || ''}</div></div>
+                    </div>`;
+            } else {
+                innerHtml += `
+                    <div class="content-row">
+                        <div style="flex:1"><span class="box-label">💡 Brainstorm</span><div class="editor-box" contenteditable="true" oninput="handleAutoExpand(this)">${data.b || ''}</div></div>
+                        <div style="flex:2"><span class="box-label">✍️ Answer</span><div class="editor-box" contenteditable="true" oninput="handleAutoExpand(this)">${data.a || ''}</div></div>
+                    </div>`;
+                div.innerHTML = innerHtml;
+            }
+            return div;
+        }
+
+        function addCommRowToBlock(btn) {
+            const container = btn.parentElement.querySelector('.rows-container');
+            container.appendChild(createCommRow());
+            saveCurrentFolder();
+        }
+
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const resultsBox = document.getElementById('searchResults');
+            if (!query) { resultsBox.style.display = 'none'; return; }
+            
+            let results = [];
+            folders.forEach(f => {
+                // Search Topic
+                if ((f.topic || "").toLowerCase().includes(query)) {
+                    results.push({ fId: f.id, title: f.topic || "Untitled", part: f.type, sub: "Open Topic", qIdx: -1 });
+                }
+                // Search Questions
+                f.questions.forEach((q, idx) => {
+                    const plainQ = q.q.replace(/<[^>]*>/g, "").toLowerCase();
+                    if (plainQ.includes(query)) {
+                        results.push({ 
+                            fId: f.id, 
+                            title: f.topic || "Untitled", 
+                            part: f.type, 
+                            sub: "Q: " + plainQ.substring(0, 45) + (plainQ.length > 45 ? "..." : ""),
+                            qIdx: idx
+                        });
+                    }
+                });
+            });
+
+            if (results.length === 0) {
+                resultsBox.innerHTML = '<div class="search-item" style="cursor:default">No results found</div>';
+            } else {
+                resultsBox.innerHTML = results.map(r => `
+                    <div class="search-item" onclick="navigateFromSearch('${r.fId}', ${r.qIdx})">
+                        <b>${r.title} <span class="search-part-tag">${r.part}</span></b>
+                        <i>${r.sub}</i>
+                    </div>
+                `).join('');
+            }
+            resultsBox.style.display = 'block';
+        }
+
+        function navigateFromSearch(fId, qIdx) {
+            document.getElementById('searchResults').style.display = 'none';
+            document.getElementById('searchInput').value = '';
+            openFolder(fId);
+            if (qIdx !== -1) {
+                setTimeout(() => {
+                    const blocks = document.querySelectorAll('.question-block');
+                    if (blocks[qIdx]) {
+                        blocks[qIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        blocks[qIdx].style.boxShadow = "0 0 20px rgba(255,143,163,0.4)";
+                        setTimeout(() => blocks[qIdx].style.boxShadow = "0 5px 20px rgba(0,0,0,0.03)", 2000);
+                    }
+                }, 400);
+            }
+        }
+
+        function showPartModal() { document.getElementById('partModal').style.display = 'flex'; }
+        function closePartModal() { document.getElementById('partModal').style.display = 'none'; }
+        
+        function createNewFolder(part) { 
+            closePartModal(); 
+            const now = new Date();
+            const dateStr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getFullYear()).slice(-2)}`;
+            const newFolder = { 
+                id: 'f_' + Date.now(), topic: '', type: part, date: dateStr, 
+                questions: [{ q: '', g: '', b: '', a: '', rows: (part === 'Communication' ? [{a:'', b:''}] : []) }] 
+            }; 
+            folders.push(newFolder); saveToLocal(); openFolder(newFolder.id); 
+        }
+        
+        function openFolder(id) {
+            currentFolderId = id; const folder = folders.find(f => f.id === id);
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('lab-interface').style.display = 'flex';
+            document.getElementById('topicInput').value = folder.topic;
+            document.getElementById('displayPart').innerText = folder.type.toUpperCase();
+            document.getElementById('displayPart').style.borderColor = `var(--color-${folder.type.toLowerCase().split(' ')[0]})`;
+            const container = document.getElementById('main-container'); container.innerHTML = '';
+            folder.questions.forEach(item => container.appendChild(createQuestionBlock(folder.type, item)));
+            updateStreakOnStudy();
+        }
+
+        function saveCurrentFolder() {
+            if (!currentFolderId) return;
+            const folder = folders.find(f => f.id === currentFolderId);
+            folder.topic = document.getElementById('topicInput').value;
+            folder.questions = Array.from(document.querySelectorAll('.question-block')).map(block => {
+                const q = block.querySelector('.question-box').innerHTML;
+                if (folder.type === 'Communication') {
+                    const rows = Array.from(block.querySelectorAll('.rows-container .content-row')).map(row => {
+                        const boxes = row.querySelectorAll('.editor-box');
+                        return { a: boxes[0].innerHTML, b: boxes[1].innerHTML };
+                    });
+                    return { q, rows };
+                } else {
+                    const editors = block.querySelectorAll('.editor-box');
+                    if (folder.type === 'Part 2') return { q, g: editors[0].innerHTML, b: editors[1].innerHTML, a: editors[2].innerHTML };
+                    return { q, b: editors[0].innerHTML, a: editors[1].innerHTML };
+                }
+            });
+            saveToLocal();
+        }
+
+        function clearDataOnly(btn) {
+            if(confirm("Clear content?")) {
+                const block = btn.parentElement;
+                block.querySelectorAll('.editor-box').forEach(el => { el.innerHTML = ""; el.style.height = 'auto'; });
+                saveCurrentFolder();
+            }
+        }
+
+        function addNewQuestion() { 
+            const folder = folders.find(f => f.id === currentFolderId);
+            const block = createQuestionBlock(folder.type);
+            document.getElementById('main-container').appendChild(block);
+            block.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function goHome() { saveCurrentFolder(); document.getElementById('dashboard').style.display = 'block'; document.getElementById('lab-interface').style.display = 'none'; updateDashboard(); }
+        function saveToLocal() { localStorage.setItem('speakingLab_folders', JSON.stringify(folders)); scSchedulePush(); }
+        function checkStreak() { if (streakData.lastDate) { const diff = (new Date().setHours(0,0,0,0) - new Date(streakData.lastDate).setHours(0,0,0,0)) / 86400000; if (diff > 1) { streakData.current = 0; saveToLocal(); } } }
+        function updateStreakOnStudy() { const today = new Date().toDateString(); if (streakData.lastDate !== today) { streakData.current = (streakData.lastDate && (new Date().setHours(0,0,0,0) - new Date(streakData.lastDate).setHours(0,0,0,0))/86400000 === 1) ? streakData.current + 1 : 1; streakData.lastDate = today; if (streakData.current > streakData.best) streakData.best = streakData.current; localStorage.setItem('speakingLab_streak', JSON.stringify(streakData)); } }
+        function deleteFolder(e, id) { e.stopPropagation(); if(confirm('Delete Topic?')) { folders = folders.filter(f => f.id !== id); saveToLocal(); updateDashboard(); } }
+        function toggleHelp() { const p = document.getElementById('shortcuts'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; }
+
+        document.addEventListener('keydown', (e) => {
+            const sel = window.getSelection();
+            if (!sel.rangeCount || sel.isCollapsed) return;
+            const key = e.key.toLowerCase();
+            if (['z', 'a', 'q', 'd'].includes(key) && !e.ctrlKey && !e.metaKey) {
+                let p = sel.anchorNode.parentElement;
+                while (p && !p.contentEditable) p = p.parentElement;
+                if (!p) return;
+                e.preventDefault();
+                if (key === 'd') { document.execCommand('styleWithCSS', false, true); document.execCommand('foreColor', false, '#e74c3c'); document.execCommand('bold', false, null); }
+                else { const colors = { z: '#fff2ac', a: '#d1eaff', q: '#ffd1dc' }; document.execCommand('backColor', false, colors[key]); }
+                saveCurrentFolder();
+            }
+        });
+
+        document.getElementById('topicInput').addEventListener('input', saveCurrentFolder);
+        window.onclick = (e) => { 
+            if (e.target.className === 'modal-overlay') closePartModal(); 
+            if (!e.target.closest('.search-container')) document.getElementById('searchResults').style.display = 'none'; 
+        };
+        updateDashboard();
+
+        // ══════════════════════════════════════
+        // CLOUD SYNC — Study Corner (shared Gist)
+        // ══════════════════════════════════════
+        const SC_TOKEN_KEY = 'SC_Token';
+        const SC_GIST_KEY  = 'SC_GistId';
+        const SC_FILE      = 'speaking_data.json';
+        let scToken  = localStorage.getItem(SC_TOKEN_KEY) || '';
+        let scGistId = localStorage.getItem(SC_GIST_KEY)  || '';
+        let scSyncTimer = null;
+
+        function scSetStatus(state, label) {
+            const d = document.getElementById('scDot');
+            const l = document.getElementById('scLabel');
+            if (d) d.className = 'sc-dot ' + state;
+            if (l) l.textContent = label;
+        }
+        function scOpenModal() {
+            document.getElementById('scTokenInput').value = scToken;
+            document.getElementById('scGistInput').value  = scGistId;
+            document.getElementById('scModal').style.display = 'flex';
+        }
+        function scCloseModal() {
+            document.getElementById('scModal').style.display = 'none';
+        }
+        document.getElementById('scModal').addEventListener('click', e => {
+            if (e.target === document.getElementById('scModal')) scCloseModal();
+        });
+        async function scSaveConfig() {
+            const tok = document.getElementById('scTokenInput').value.trim();
+            const gid = document.getElementById('scGistInput').value.trim();
+            if (!tok) { alert('Vui lòng nhập GitHub Token!'); return; }
+            scToken  = tok; scGistId = gid;
+            localStorage.setItem(SC_TOKEN_KEY, tok);
+            scSetStatus('syncing', 'Đang kết nối...');
+            scCloseModal();
+            if (!gid) {
+                await scCreateGist();
+            } else {
+                localStorage.setItem(SC_GIST_KEY, gid);
+                await scPull();
+            }
+        }
+        async function scCreateGist() {
+            try {
+                const payload = {};
+            payload['speakingLab_folders'] = localStorage.getItem('speakingLab_folders') || '{}';
+            payload['speakingLab_streak'] = localStorage.getItem('speakingLab_streak') || '{}';
+                const res = await fetch('https://api.github.com/gists', {
+                    method: 'POST',
+                    headers: { 'Authorization': `token ${scToken}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        description: 'StudyCorner - speaking_data.json',
+                        public: false,
+                        files: { [SC_FILE]: { content: JSON.stringify(payload) } }
+                    })
+                });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                scGistId = data.id;
+                localStorage.setItem(SC_GIST_KEY, scGistId);
+                scSetStatus('synced', 'Đã tạo ✓');
+                setTimeout(() => alert(`✅ Gist đã tạo!\n\nGist ID: ${scGistId}\n\nDùng ID này cho tất cả các trang khác.`), 200);
+            } catch(e) {
+                scSetStatus('error', 'Lỗi!');
+                alert('❌ Không tạo được Gist. Kiểm tra lại token!');
+            }
+        }
+        async function scPush() {
+            if (!scToken || !scGistId) return;
+            scSetStatus('syncing', 'Saving...');
+            try {
+                const payload = {};
+            payload['speakingLab_folders'] = localStorage.getItem('speakingLab_folders') || '{}';
+            payload['speakingLab_streak'] = localStorage.getItem('speakingLab_streak') || '{}';
+                const res = await fetch(`https://api.github.com/gists/${scGistId}`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `token ${scToken}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ files: { [SC_FILE]: { content: JSON.stringify(payload) } } })
+                });
+                if (!res.ok) throw new Error();
+                const now = new Date();
+                scSetStatus('synced', `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`);
+            } catch(e) { scSetStatus('error', 'Sync lỗi'); }
+        }
+        async function scPull() {
+            if (!scToken || !scGistId) return;
+            scSetStatus('syncing', 'Loading...');
+            try {
+                const res = await fetch(`https://api.github.com/gists/${scGistId}`, {
+                    headers: { 'Authorization': `token ${scToken}` }
+                });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                const file = data.files[SC_FILE];
+                if (file && file.content) {
+                    const d = JSON.parse(file.content);
+            if (d['speakingLab_folders'] !== undefined) { localStorage.setItem('speakingLab_folders', typeof d['speakingLab_folders'] === 'string' ? d['speakingLab_folders'] : JSON.stringify(d['speakingLab_folders'])); }
+            if (d['speakingLab_streak'] !== undefined) { localStorage.setItem('speakingLab_streak', typeof d['speakingLab_streak'] === 'string' ? d['speakingLab_streak'] : JSON.stringify(d['speakingLab_streak'])); }
+                    scSetStatus('synced', 'Synced ✓');
+                    location.reload();
+                } else {
+                    scSetStatus('synced', 'Gist trống');
+                }
+            } catch(e) { scSetStatus('error', 'Load lỗi'); }
+        }
+        function scSchedulePush() {
+            if (!scToken || !scGistId) return;
+            clearTimeout(scSyncTimer);
+            scSyncTimer = setTimeout(scPush, 2000);
+        }
+        // Init
+        if (scToken && scGistId) scPull();
+        else if (scToken) scSetStatus('error', 'Thiếu Gist ID');
+        else scSetStatus('', 'Offline');
+        // ══════════════════════════════════════
+        // END SYNC
+        // ══════════════════════════════════════
+    </script>
+</body>
+</html>

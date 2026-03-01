@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Corner</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --sky: #e8f4fd;
+  --sky2: #d0eaf9;
+  --cloud: #ffffff;
+  --accent: #4a90d9;
+  --accent2: #6fb3f0;
+  --gold: #f5a623;
+  --coral: #ff7c7c;
+  --mint: #52c4a0;
+  --lavender: #9b8fe8;
+  --text: #2c3e50;
+  --text2: #5d7a8a;
+  --text3: #9bb5c3;
+  --shadow: 0 8px 32px rgba(74,144,217,0.12);
+  --shadow2: 0 20px 60px rgba(74,144,217,0.18);
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: linear-gradient(160deg, #c8e6f7 0%, #e0f2fe 40%, #f0f8ff 70%, #e8f0fb 100%);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  color: var(--text);
+}
+
+/* ── ANIMATED BACKGROUND PAPER PLANES ── */
+.bg-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* ── FLOATING CLOUDS ── */
+.cloud {
+  position: absolute;
+  background: rgba(255,255,255,0.7);
+  border-radius: 50px;
+  animation: driftCloud linear infinite;
+  filter: blur(0.5px);
+}
+.cloud::before, .cloud::after {
+  content: '';
+  position: absolute;
+  background: rgba(255,255,255,0.7);
+  border-radius: 50%;
+}
+
+@keyframes driftCloud {
+  from { transform: translateX(-200px); opacity: 0; }
+  5% { opacity: 1; }
+  95% { opacity: 0.8; }
+  to { transform: translateX(110vw); opacity: 0; }
+}
+
+/* ── MAIN WRAPPER ── */
+.wrapper {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px 80px;
+}
+
+/* ── HEADER ── */
+.site-header {
+  width: 100%;
+  max-width: 900px;
+  padding: 40px 0 10px;
+  text-align: center;
+}
+
+.site-title {
+  font-family: 'Lora', serif;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -1px;
+  line-height: 1.1;
+  margin-bottom: 10px;
+  position: relative;
+  display: inline-block;
+}
+.quote-strip {
+  margin: 14px auto 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.65);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.9);
+  padding: 10px 22px;
+  border-radius: 50px;
+  font-size: 13.5px;
+  color: var(--text2);
+  font-style: italic;
+  box-shadow: var(--shadow);
+  animation: fadeSlideDown 0.8s ease both;
+}
+.quote-strip strong { color: var(--accent); font-style: normal; font-weight: 600; }
+
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translateY(-14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── GLOBAL SEARCH ── */
+.search-section {
+  width: 100%;
+  max-width: 680px;
+  margin: 28px 0 32px;
+  animation: fadeSlideDown 0.9s ease 0.1s both;
+}
+.search-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.search-wrap input {
+  width: 100%;
+  padding: 15px 50px 15px 52px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(16px);
+  border: 2px solid rgba(255,255,255,0.95);
+  border-radius: 50px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: var(--text);
+  outline: none;
+  box-shadow: var(--shadow2);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-wrap input:focus {
+  border-color: var(--accent2);
+  box-shadow: 0 0 0 4px rgba(74,144,217,0.12), var(--shadow2);
+}
+.search-wrap input::placeholder { color: var(--text3); }
+.search-icon {
+  position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+  font-size: 20px; pointer-events: none; color: var(--text3);
+}
+.search-clear {
+  position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: var(--text3);
+  font-size: 18px; display: none; padding: 4px; border-radius: 50%;
+  transition: color 0.2s;
+}
+.search-clear:hover { color: var(--coral); }
+
+.search-results-dropdown {
+  position: relative;
+  margin-top: 10px;
+  left: 0; right: 0;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.9);
+  border-radius: 20px;
+  box-shadow: var(--shadow2);
+  max-height: 380px;
+  overflow-y: auto;
+  z-index: 100;
+  display: none;
+}
+.search-results-dropdown::-webkit-scrollbar { width: 4px; }
+.search-results-dropdown::-webkit-scrollbar-thumb { background: var(--accent2); border-radius: 2px; }
+
+.sr-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 1px solid rgba(74,144,217,0.07);
+  cursor: pointer;
+  transition: background 0.15s;
+  text-decoration: none;
+}
+.sr-item:hover { background: rgba(74,144,217,0.06); }
+.sr-item:last-child { border-bottom: none; }
+.sr-item-icon { font-size: 20px; flex-shrink: 0; }
+.sr-item-main { flex: 1; min-width: 0; }
+.sr-item-word { font-weight: 600; color: var(--accent); font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sr-item-sub { font-size: 12px; color: var(--text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sr-item-tag { font-size: 10px; background: rgba(74,144,217,0.1); color: var(--accent); padding: 3px 9px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; font-weight: 600; }
+.sr-item-tag.korean { background: rgba(155,143,232,0.12); color: var(--lavender); }
+.sr-item-tag.writing { background: rgba(245,166,35,0.12); color: var(--gold); }
+.sr-item-tag.speaking { background: rgba(255,124,124,0.12); color: var(--coral); }
+.sr-empty { padding: 20px; text-align: center; color: var(--text3); font-size: 14px; }
+.sr-sound-btn {
+  background: rgba(74,144,217,0.08); border: 1px solid rgba(74,144,217,0.15);
+  border-radius: 50%; width: 28px; height: 28px; cursor: pointer;
+  font-size: 13px; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: background 0.15s; padding: 0;
+}
+.sr-sound-btn:hover { background: rgba(74,144,217,0.18); }
+
+/* ── LABS GRID ── */
+.labs-layout {
+  width: 100%;
+  max-width: 900px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  animation: fadeSlideDown 1s ease 0.2s both;
+}
+
+@media (max-width: 640px) {
+  .labs-layout { grid-template-columns: 1fr; gap: 20px; }
+}
+
+.column-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.column-label {
+  font-family: 'Lora', serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding-bottom: 8px;
+  border-bottom: 2px solid rgba(74,144,217,0.12);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.column-label .col-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+
+/* Lab cards */
+.lab-card {
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(18px);
+  border: 1.5px solid rgba(255,255,255,0.95);
+  border-radius: 16px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s, border-color 0.25s;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.lab-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 4px;
+  border-radius: 16px 0 0 16px;
+  opacity: 0.85;
+}
+.lab-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: var(--shadow2);
+}
+
+.lab-card.eng-vocab::before { background: linear-gradient(180deg, #4a90d9, #6fb3f0); }
+.lab-card.writing::before  { background: linear-gradient(180deg, #f5a623, #ffd166); }
+.lab-card.speaking::before { background: linear-gradient(180deg, #ff7c7c, #ffb3b3); }
+.lab-card.kor-vocab::before { background: linear-gradient(180deg, #9b8fe8, #c4b5fd); }
+
+.lab-card:hover.eng-vocab { border-color: rgba(74,144,217,0.35); }
+.lab-card:hover.writing   { border-color: rgba(245,166,35,0.35); }
+.lab-card:hover.speaking  { border-color: rgba(255,124,124,0.35); }
+.lab-card:hover.kor-vocab { border-color: rgba(155,143,232,0.35); }
+
+.lab-emoji { font-size: 26px; display: block; flex-shrink: 0; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.08)); }
+.lab-name {
+  font-family: 'Lora', serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+.lab-info { flex: 1; min-width: 0; }
+
+.lab-arrow {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  transition: transform 0.2s;
+  background: rgba(74,144,217,0.08);
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+.lab-card.writing .lab-arrow { background: rgba(245,166,35,0.1); color: var(--gold); }
+.lab-card.speaking .lab-arrow { background: rgba(255,124,124,0.1); color: var(--coral); }
+.lab-card.kor-vocab .lab-arrow { background: rgba(155,143,232,0.1); color: var(--lavender); }
+.lab-card:hover .lab-arrow { transform: translateX(4px); }
+
+/* ── FOOTER BAR ── */
+.footer-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 48px;
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255,255,255,0.9);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+  z-index: 500;
+}
+
+.watermark {
+  font-family: 'Dancing Script', cursive;
+  font-size: 12px;
+  color: rgba(74,144,217,0.35);
+  pointer-events: none;
+}
+
+/* Sync status */
+.sync-status {
+  font-size: 11px;
+  color: var(--text3);
+  background: rgba(74,144,217,0.07);
+  padding: 3px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.2s;
+  border: 1px solid transparent;
+  margin-left: 8px;
+}
+.sync-status:hover { background: rgba(74,144,217,0.13); border-color: rgba(74,144,217,0.2); }
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: #ccc; }
+.sync-dot.synced { background: #52c4a0; }
+.sync-dot.syncing { background: var(--gold); animation: pulse 1s infinite; }
+.sync-dot.error { background: var(--coral); }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+/* ── SYNC MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(44,62,80,0.35);
+  backdrop-filter: blur(6px);
+  z-index: 2000;
+  display: none;
+  align-items: center; justify-content: center;
+}
+.modal-box {
+  background: rgba(255,255,255,0.97);
+  border-radius: 24px;
+  padding: 32px 36px;
+  width: 420px; max-width: 90vw;
+  box-shadow: 0 24px 80px rgba(74,144,217,0.2);
+  border: 1.5px solid rgba(255,255,255,0.9);
+}
+.modal-box h3 { font-family: 'Lora', serif; font-size: 20px; color: var(--text); margin-bottom: 6px; }
+.modal-box p { font-size: 12px; color: var(--text3); margin-bottom: 20px; }
+.modal-input {
+  width: 100%; padding: 11px 14px;
+  border: 2px solid rgba(74,144,217,0.15);
+  border-radius: 12px;
+  font-size: 13px; font-family: monospace;
+  outline: none; margin-bottom: 10px;
+  color: var(--text); background: #f8fbff;
+  transition: border-color 0.2s;
+}
+.modal-input:focus { border-color: var(--accent2); }
+.modal-btn {
+  width: 100%; padding: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none; border-radius: 14px;
+  color: white; font-weight: 600; font-size: 14px;
+  cursor: pointer; margin-top: 4px;
+  transition: opacity 0.2s, transform 0.1s;
+}
+.modal-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.modal-hint { font-size: 11px; color: var(--text3); margin-top: 12px; line-height: 1.7; }
+.modal-hint a { color: var(--accent); }
+.modal-skip { display: block; text-align: center; font-size: 12px; color: var(--text3); margin-top: 10px; cursor: pointer; }
+.modal-skip:hover { color: var(--text2); }
+
+/* ── OVERLAY FOR SUBPAGES ── */
+.page-overlay {
+  position: fixed; inset: 0;
+  z-index: 1500;
+  display: none;
+  flex-direction: column;
+}
+.page-overlay.open { display: flex; }
+.overlay-topbar {
+  height: 48px;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(74,144,217,0.1);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.overlay-back {
+  background: rgba(74,144,217,0.08);
+  border: 1px solid rgba(74,144,217,0.15);
+  border-radius: 10px;
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.overlay-back:hover { background: rgba(74,144,217,0.15); }
+.overlay-title { font-family: 'Lora', serif; font-size: 15px; font-weight: 700; color: var(--text); }
+.overlay-iframe {
+  flex: 1;
+  border: none;
+  width: 100%;
+}
+
+/* animations */
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.lab-card { animation: fadeIn 0.5s ease both; }
+.lab-card:nth-child(1){animation-delay:.1s}
+.lab-card:nth-child(2){animation-delay:.2s}
+.lab-card:nth-child(3){animation-delay:.3s}
+</style>
+</head>
+<body>
+
+<!-- Animated background -->
+<div class="bg-canvas" id="bgCanvas"></div>
+
+<!-- Sync Modal -->
+<div class="modal-overlay" id="syncModal" style="display:none;">
+  <div class="modal-box">
+    <h3>☁️ Cloud Sync</h3>
+    <p>Kết nối GitHub Gist để đồng bộ dữ liệu giữa các thiết bị</p>
+    <input class="modal-input" id="modalToken" type="password" placeholder="GitHub Personal Access Token" autocomplete="off">
+    <input class="modal-input" id="modalGistId" type="text" placeholder="Gist ID (để trống để tạo mới)" autocomplete="off">
+    <button class="modal-btn" onclick="saveSyncConfig()">💾 Lưu & Kết nối</button>
+    <p class="modal-hint">
+      📌 Tạo token tại <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens</a><br>
+      → Chọn scope: <b>gist</b> → Generate → Copy token<br>
+      📌 Gist ID: lấy từ URL gist (<code>gist.github.com/user/<b>GIST_ID</b></code>)
+    </p>
+    <span class="modal-skip" onclick="closeSyncModal()">Bỏ qua, dùng offline</span>
+  </div>
+</div>
+
+<!-- Page Overlay (for subpages) -->
+<div class="page-overlay" id="pageOverlay">
+  <div class="overlay-topbar">
+    <button class="overlay-back" onclick="closeSubPage()">← Back</button>
+    <span class="overlay-title" id="overlayTitle"></span>
+  </div>
+  <iframe class="overlay-iframe" id="subiframe" src="about:blank" allow="microphone"></iframe>
+</div>
+
+<!-- Main content -->
+<div class="wrapper">
+  <header class="site-header">
+    <h1 class="site-title">Study Corner</h1>
+    <div class="quote-strip">
+      ✨ <strong>Keep dreaming.</strong> You can do it. Let's study hard.
+    </div>
+  </header>
+
+  <!-- Search -->
+  <div class="search-section">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="globalSearch" placeholder="Tìm kiếm từ vựng, writing, speaking..." autocomplete="off" oninput="handleSearch()">
+      <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+      <div class="search-results-dropdown" id="searchDropdown"></div>
+    </div>
+  </div>
+
+  <!-- Labs -->
+  <div class="labs-layout">
+    <!-- English column -->
+    <div class="column-block">
+      <div class="column-label">
+        <span class="col-dot" style="background: var(--accent)"></span>
+        Learning English
+      </div>
+      <a class="lab-card eng-vocab" onclick="openSubPage('flashcardeng.html','📚 English Vocab Lab')">
+        <span class="lab-emoji">📚</span>
+        <div class="lab-info"><div class="lab-name">English Vocab Lab</div></div>
+        <div class="lab-arrow">→</div>
+      </a>
+      <a class="lab-card writing" onclick="openSubPage('writing.html','✍️ Writing Lab')">
+        <span class="lab-emoji">✍️</span>
+        <div class="lab-info"><div class="lab-name">Writing Lab</div></div>
+        <div class="lab-arrow">→</div>
+      </a>
+      <a class="lab-card speaking" onclick="openSubPage('speaking.html','🎙️ Speaking Lab')">
+        <span class="lab-emoji">🎙️</span>
+        <div class="lab-info"><div class="lab-name">Speaking Lab</div></div>
+        <div class="lab-arrow">→</div>
+      </a>
+    </div>
+
+    <!-- Korean column -->
+    <div class="column-block">
+      <div class="column-label">
+        <span class="col-dot" style="background: var(--lavender)"></span>
+        한국어를 배우다
+      </div>
+      <a class="lab-card kor-vocab" onclick="openSubPage('flashcardkorean.html','🌸 Korean Vocab Lab')">
+        <span class="lab-emoji">🌸</span>
+        <div class="lab-info"><div class="lab-name">Korean Vocab Lab</div></div>
+        <div class="lab-arrow">→</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="footer-bar">
+  <span class="watermark">cloudofdecember</span>
+  <div class="sync-status" id="syncStatus" onclick="openSyncModal()" title="Click để cấu hình sync">
+    <div class="sync-dot" id="syncDot"></div>
+    <span id="syncLabel">Offline</span>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// ANIMATED BACKGROUND
+// ═══════════════════════════════════════
+(function initBackground() {
+  const canvas = document.getElementById('bgCanvas');
+
+  // Clouds
+  const cloudDefs = [
+    {w:180,h:55,top:'12%',dur:28,delay:-5},
+    {w:120,h:38,top:'28%',dur:38,delay:-12},
+    {w:220,h:65,top:'48%',dur:32,delay:-20},
+    {w:90,h:30,top:'65%',dur:45,delay:-8},
+    {w:150,h:48,top:'78%',dur:25,delay:-15},
+    {w:100,h:32,top:'20%',dur:50,delay:-30},
+  ];
+  cloudDefs.forEach(def => {
+    const c = document.createElement('div');
+    c.className = 'cloud';
+    c.style.cssText = `
+      width:${def.w}px; height:${def.h}px; top:${def.top};
+      animation-duration:${def.dur}s; animation-delay:${def.delay}s;
+    `;
+    // Puffs
+    const puff1 = document.createElement('div');
+    puff1.style.cssText = `width:${def.w*0.45}px;height:${def.w*0.45}px;background:rgba(255,255,255,0.7);border-radius:50%;position:absolute;top:${-def.w*0.12}px;left:${def.w*0.15}px;`;
+    const puff2 = document.createElement('div');
+    puff2.style.cssText = `width:${def.w*0.35}px;height:${def.w*0.35}px;background:rgba(255,255,255,0.65);border-radius:50%;position:absolute;top:${-def.w*0.07}px;left:${def.w*0.45}px;`;
+    c.appendChild(puff1);
+    c.appendChild(puff2);
+    canvas.appendChild(c);
+  });
+})();
+
+// ═══════════════════════════════════════
+// SEARCH DATA (từ các file con)
+// ═══════════════════════════════════════
+const ENG_VOCAB = {
+  "Day 1": { description: "Adjectives & nouns for describing art and life", words: [
+    {en:"Charismatic",ipa:"/ˌkær.ɪzˈmæt.ɪk/",type:"Adj",vi:"Có sức hút, lôi cuốn"},
+    {en:"Immortal",ipa:"/ɪˈmɔː.təl/",type:"Adj",vi:"Bất tử; trường tồn mãi mãi"},
+    {en:"Exquisite",ipa:"/ɪkˈskwɪz.ɪt/",type:"Adj",vi:"Tinh xảo; vô cùng tinh tế"},
+    {en:"Tragedy",ipa:"/ˈtrædʒ.ə.di/",type:"Noun",vi:"Bi kịch; sự việc đau buồn nghiêm trọng"}
+  ]},
+  "Day 2": { description: "Words about empowerment and social equality", words: [
+    {en:"Empower",ipa:"/ɪmˈpaʊər/",type:"Verb",vi:"Trao quyền; làm cho ai đó tự tin hơn"},
+    {en:"Equality",ipa:"/ɪˈkwɒl.ə.ti/",type:"Noun",vi:"Sự bình đẳng"},
+    {en:"Discrimination",ipa:"/dɪˌskrɪm.ɪˈneɪ.ʃən/",type:"Noun",vi:"Sự phân biệt đối xử"},
+    {en:"Resilient",ipa:"/rɪˈzɪl.i.ənt/",type:"Adj",vi:"Kiên cường; có khả năng vượt qua khó khăn"},
+    {en:"Contribution",ipa:"/ˌkɒn.trɪˈbjuː.ʃən/",type:"Noun",vi:"Sự đóng góp"}
+  ]}
+};
+
+const KOR_VOCAB = {
+  "Ngày 1": { description: "Cảm xúc & tính cách cơ bản", words: [
+    {ko:"행복하다",rom:"haengbokhada",type:"Tính từ",vi:"Hạnh phúc, vui vẻ"},
+    {ko:"슬프다",rom:"seulpeuda",type:"Tính từ",vi:"Buồn bã, đau lòng"},
+    {ko:"화나다",rom:"hwanada",type:"Động từ",vi:"Tức giận, nổi giận"},
+    {ko:"무섭다",rom:"museopda",type:"Tính từ",vi:"Đáng sợ, sợ hãi"},
+    {ko:"부끄럽다",rom:"bukkeureopda",type:"Tính từ",vi:"Xấu hổ, ngượng ngùng"}
+  ]},
+  "Ngày 2": { description: "Hành động & hoạt động hàng ngày", words: [
+    {ko:"공부하다",rom:"gongbuhada",type:"Động từ",vi:"Học bài, học tập"},
+    {ko:"요리하다",rom:"yorihada",type:"Động từ",vi:"Nấu ăn"},
+    {ko:"산책하다",rom:"sanchaekada",type:"Động từ",vi:"Đi dạo, tản bộ"},
+    {ko:"쉬다",rom:"swida",type:"Động từ",vi:"Nghỉ ngơi"},
+    {ko:"이야기하다",rom:"iyagihada",type:"Động từ",vi:"Nói chuyện, trò chuyện"}
+  ]},
+  "Ngày 3": { description: "Tính từ mô tả người & sự vật", words: [
+    {ko:"예쁘다",rom:"yeppeuda",type:"Tính từ",vi:"Xinh đẹp, dễ thương"},
+    {ko:"크다",rom:"keuda",type:"Tính từ",vi:"To, lớn"},
+    {ko:"빠르다",rom:"ppareuda",type:"Tính từ",vi:"Nhanh chóng"},
+    {ko:"맛있다",rom:"masitda",type:"Tính từ",vi:"Ngon, ngon miệng"},
+    {ko:"어렵다",rom:"eoryeopda",type:"Tính từ",vi:"Khó, khó khăn"}
+  ]}
+};
+
+// Load Writing & Speaking từ localStorage để search
+function getWritingItems() {
+  const folders = JSON.parse(localStorage.getItem('WritingLab_Stable_Data')) || [];
+  const results = [];
+  folders.forEach(f => {
+    if (f.topic) results.push({ type: 'writing', label: f.topic, sub: `${f.type} · ${f.subType || ''}`, icon: '✍️' });
+  });
+  return results;
+}
+function getSpeakingItems() {
+  const folders = JSON.parse(localStorage.getItem('speakingLab_folders')) || [];
+  const results = [];
+  folders.forEach(f => {
+    if (f.topic) results.push({ type: 'speaking', label: f.topic, sub: `${f.type}`, icon: '🎙️' });
+    if (f.questions) {
+      f.questions.forEach(q => {
+        if (q.q && q.q.replace(/<[^>]+>/g,'').trim()) {
+          const text = q.q.replace(/<[^>]+>/g,'').substring(0, 60);
+          results.push({ type: 'speaking', label: text, sub: f.topic || f.type, icon: '💬' });
+        }
+      });
+    }
+  });
+  return results;
+}
+
+function handleSearch() {
+  const q = document.getElementById('globalSearch').value.trim().toLowerCase();
+  const clearBtn = document.getElementById('searchClear');
+  const dropdown = document.getElementById('searchDropdown');
+
+  clearBtn.style.display = q ? 'block' : 'none';
+
+  if (!q) { dropdown.style.display = 'none'; return; }
+
+  const results = [];
+
+  // Search English vocab
+  Object.entries(ENG_VOCAB).forEach(([day, data]) => {
+    data.words.forEach(w => {
+      if (w.en.toLowerCase().includes(q) || w.vi.toLowerCase().includes(q)) {
+        results.push({
+          icon: '📚',
+          word: w.en,
+          sub: w.vi + ' · ' + (w.ipa || ''),
+          tag: day,
+          tagClass: '',
+          page: 'flashcardeng.html',
+          pageTitle: '📚 English Vocab Lab',
+          sound: w.en,
+          lang: 'en-US'
+        });
+      }
+    });
+  });
+
+  // Search Korean vocab
+  Object.entries(KOR_VOCAB).forEach(([day, data]) => {
+    data.words.forEach(w => {
+      if (w.ko.includes(q) || w.rom.toLowerCase().includes(q) || w.vi.toLowerCase().includes(q)) {
+        results.push({
+          icon: '🌸',
+          word: w.ko,
+          sub: w.vi + ' · ' + w.rom,
+          tag: day,
+          tagClass: 'korean',
+          page: 'flashcardkorean.html',
+          pageTitle: '🌸 Korean Vocab Lab',
+          sound: w.ko,
+          lang: 'ko-KR'
+        });
+      }
+    });
+  });
+
+  // Search Writing
+  getWritingItems().forEach(item => {
+    if (item.label.toLowerCase().includes(q)) {
+      results.push({
+        icon: '✍️',
+        word: item.label,
+        sub: item.sub,
+        tag: 'Writing',
+        tagClass: 'writing',
+        page: 'writing.html',
+        pageTitle: '✍️ Writing Lab'
+      });
+    }
+  });
+
+  // Search Speaking
+  getSpeakingItems().forEach(item => {
+    if (item.label.toLowerCase().includes(q)) {
+      results.push({
+        icon: item.icon,
+        word: item.label,
+        sub: item.sub,
+        tag: 'Speaking',
+        tagClass: 'speaking',
+        page: 'speaking.html',
+        pageTitle: '🎙️ Speaking Lab'
+      });
+    }
+  });
+
+  if (results.length === 0) {
+    dropdown.innerHTML = `<div class="sr-empty">Không tìm thấy kết quả cho "<strong>${q}</strong>"</div>`;
+  } else {
+    dropdown.innerHTML = results.slice(0, 12).map(r => `
+      <div class="sr-item" onclick="openSubPage('${r.page}','${r.pageTitle}')">
+        <span class="sr-item-icon">${r.icon}</span>
+        <div class="sr-item-main">
+          <div class="sr-item-word">${r.word}</div>
+          <div class="sr-item-sub">${r.sub}</div>
+        </div>
+        ${r.sound ? `<button class="sr-sound-btn" onclick="event.stopPropagation();speakWord('${r.sound}','${r.lang || 'en-US'}')" title="Nghe phát âm">🔊</button>` : ''}
+        <span class="sr-item-tag ${r.tagClass}">${r.tag}</span>
+      </div>`).join('');
+  }
+  dropdown.style.display = 'block';
+}
+
+function clearSearch() {
+  document.getElementById('globalSearch').value = '';
+  document.getElementById('searchClear').style.display = 'none';
+  document.getElementById('searchDropdown').style.display = 'none';
+}
+function speakWord(text, lang) {
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = lang; u.rate = 0.85;
+  window.speechSynthesis.speak(u);
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.search-wrap')) {
+    document.getElementById('searchDropdown').style.display = 'none';
+  }
+});
+
+// ═══════════════════════════════════════
+// SUB PAGE NAVIGATION
+// ═══════════════════════════════════════
+function openSubPage(page, title) {
+  const overlay = document.getElementById('pageOverlay');
+  const iframe = document.getElementById('subframe') || document.getElementById('subiframe');
+  document.getElementById('overlayTitle').textContent = title;
+  iframe.src = page;
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSubPage() {
+  const overlay = document.getElementById('pageOverlay');
+  overlay.classList.remove('open');
+  document.getElementById('subiframe').src = 'about:blank';
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeSubPage();
+});
+
+// ═══════════════════════════════════════
+// GIST SYNC (cho trang chủ - tùy chọn)
+// ═══════════════════════════════════════
+const GIST_TOKEN_KEY = 'SC_Token';
+const GIST_ID_KEY = 'SC_GistId';
+let gistToken = localStorage.getItem(GIST_TOKEN_KEY) || '';
+let gistId = localStorage.getItem(GIST_ID_KEY) || '';
+let syncTimer = null;
+let isSyncing = false;
+
+function setSyncStatus(state, label) {
+  document.getElementById('syncDot').className = 'sync-dot ' + state;
+  document.getElementById('syncLabel').textContent = label;
+}
+function openSyncModal() {
+  document.getElementById('modalToken').value = gistToken;
+  document.getElementById('modalGistId').value = gistId;
+  document.getElementById('syncModal').style.display = 'flex';
+}
+function closeSyncModal() {
+  document.getElementById('syncModal').style.display = 'none';
+}
+async function saveSyncConfig() {
+  const token = document.getElementById('modalToken').value.trim();
+  const id = document.getElementById('modalGistId').value.trim();
+  if (!token) { alert('Vui lòng nhập GitHub Token!'); return; }
+  gistToken = token;
+  gistId = id;
+  localStorage.setItem(GIST_TOKEN_KEY, token);
+  setSyncStatus('syncing', 'Đang kết nối...');
+  closeSyncModal();
+  if (!gistId) {
+    await createGist();
+  } else {
+    localStorage.setItem(GIST_ID_KEY, gistId);
+    setSyncStatus('synced', 'Đã kết nối ✓');
+  }
+}
+async function createGist() {
+  try {
+    const payload = {
+      WritingLab: localStorage.getItem('WritingLab_Stable_Data') || '[]',
+      SpeakingLab: localStorage.getItem('speakingLab_folders') || '[]',
+    };
+    const res = await fetch('https://api.github.com/gists', {
+      method: 'POST',
+      headers: { 'Authorization': `token ${gistToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        description: 'StudyCorner Data', public: false,
+        files: { 'studycorner_data.json': { content: JSON.stringify(payload) } }
+      })
+    });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    gistId = data.id;
+    localStorage.setItem(GIST_ID_KEY, gistId);
+    setSyncStatus('synced', 'Đã tạo Gist ✓');
+    setTimeout(() => alert(`✅ Gist mới đã được tạo!\n\nGist ID: ${gistId}\n\nHãy copy ID này để nhập vào thiết bị khác.`), 300);
+  } catch {
+    setSyncStatus('error', 'Lỗi tạo Gist');
+    alert('❌ Không tạo được Gist. Kiểm tra lại token!');
+  }
+}
+
+if (gistToken && gistId) setSyncStatus('synced', 'Đã kết nối');
+else setSyncStatus('', 'Offline · Click để sync');
+
+// Close modal on overlay click
+document.getElementById('syncModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('syncModal')) closeSyncModal();
+});
+</script>
+</body>
+</html>

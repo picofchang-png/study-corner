@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Korean Vocab Lab</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+/* ── ROOT COLORS ── */
+:root {
+  --bg: #130f07;
+  --surface: #1c1710;
+  --surface2: #252018;
+  --surface3: #302a1e;
+  --border: rgba(255,210,100,0.08);
+  --border2: rgba(255,210,100,0.18);
+  --text: #f0e8d0;
+  --text2: #a09070;
+  --text3: #60503a;
+  --accent: #e8a020;
+  --accent2: #f0c040;
+  --neon: #ffd166;
+  --neon2: #ffb830;
+  --red: #ff4d6d;
+  --orange: #ff9940;
+  --green: #00c896;
+  --gold: #ffd166;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* ── NOISE ── */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9998;opacity:0.5}
+
+/* ── SNOW CANVAS ── */
+#snow-canvas{position:fixed;inset:0;pointer-events:none;z-index:9997}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex;flex-direction:column}
+
+/* ══ HOME ══ */
+#home-screen{align-items:center;padding:0 20px 40px}
+
+.home-header{width:100%;max-width:860px;display:flex;justify-content:space-between;align-items:center;padding:28px 0 20px}
+.logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header-actions{display:flex;gap:10px;align-items:center}
+.streak-pill{display:flex;gap:8px}
+.streak-badge{background:var(--surface2);border:1px solid var(--border2);padding:6px 14px;border-radius:99px;font-size:13px;font-weight:500;cursor:default}
+.streak-badge.fire{color:var(--orange)}.streak-badge.trophy{color:var(--gold)}
+.icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.2s}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* Search */
+.search-wrap{width:100%;max-width:860px;position:relative;margin-bottom:16px}
+.search-wrap input{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:14px 20px 14px 48px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color 0.2s,box-shadow 0.2s}
+.search-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,160,32,0.15)}
+.search-wrap input::placeholder{color:var(--text3)}
+.search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:18px;pointer-events:none}
+#search-results{position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);max-height:340px;overflow-y:auto;z-index:200;box-shadow:var(--shadow)}
+.search-item{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--border);transition:background 0.15s}
+.search-item:hover{background:var(--surface2)}.search-item:last-child{border-bottom:none}
+.si-word{font-weight:600;color:var(--accent);font-size:15px}
+.si-vi{color:var(--text2);font-size:12px;margin-top:2px}
+.si-tag{margin-left:auto;font-size:11px;background:var(--surface3);padding:3px 8px;border-radius:6px;color:var(--text3);white-space:nowrap}
+
+/* Stats pills */
+.stats-pills{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:7px 20px;margin-bottom:22px;width:fit-content}
+.stat-pill{display:flex;align-items:center;gap:6px}
+.sp-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sp-dot.green{background:var(--green)}.sp-dot.accent{background:var(--accent)}.sp-dot.gold{background:var(--gold)}
+.sp-num{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--text)}
+.sp-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px}
+.stat-divider{width:1px;height:16px;background:var(--border2);margin:0 14px}
+
+/* Section titles */
+.section-title{width:100%;max-width:860px;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Folder grid */
+.folder-grid{width:100%;max-width:860px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:24px}
+.folder-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 14px 12px;cursor:pointer;position:relative;overflow:hidden;transition:all 0.25s}
+.folder-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:0;transition:opacity 0.25s}
+.folder-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--shadow)}.folder-card:hover::before{opacity:1}
+.folder-card.urgent{border-color:rgba(255,77,109,0.3);background:rgba(255,77,109,0.05)}.folder-card.urgent::before{background:linear-gradient(90deg,var(--red),var(--orange));opacity:1}
+.fc-icon{font-size:18px;margin-bottom:6px}
+.fc-title{font-weight:600;font-size:13px;margin-bottom:1px}
+.fc-desc-text{font-size:10px;color:var(--text3);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.fc-sub{font-size:11px;color:var(--text3)}
+.fc-prog-wrap{height:2px;background:var(--surface3);border-radius:2px;margin-top:8px;overflow:hidden}
+.fc-prog{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.6s ease}
+.fc-edit{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--text3);font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s}
+.folder-card:hover .fc-edit{opacity:1}
+
+/* Games grid */
+.games-grid{width:100%;max-width:860px;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:24px}
+.game-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 20px;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden}
+.game-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--shadow)}
+.gc-glow{position:absolute;inset:0;opacity:0;transition:opacity 0.3s;pointer-events:none}
+.game-card:hover .gc-glow{opacity:1}
+.gc-icon{font-size:28px;margin-bottom:10px}.gc-title{font-weight:600;font-size:15px;margin-bottom:4px}.gc-desc{font-size:12px;color:var(--text3)}
+.gc-best{font-size:11px;color:var(--gold);margin-top:6px;font-family:'DM Mono',monospace}
+
+/* Heatmap */
+.heatmap-wrap{width:100%;max-width:860px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin-bottom:32px}
+.heatmap-title{font-size:13px;font-weight:600;margin-bottom:16px;color:var(--text2)}
+.heatmap-grid{display:flex;gap:4px;flex-wrap:wrap}
+.hm-cell{width:14px;height:14px;border-radius:3px;background:var(--surface3);transition:transform 0.1s;cursor:default;position:relative}
+.hm-cell:hover{transform:scale(1.3);z-index:2}
+.hm-cell[data-count="1"]{background:rgba(232,160,32,0.2)}.hm-cell[data-count="2"]{background:rgba(232,160,32,0.45)}
+.hm-cell[data-count="3"]{background:rgba(232,160,32,0.7)}.hm-cell[data-count="4"]{background:var(--accent)}
+.hm-legend{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:11px;color:var(--text3)}
+.hm-legend-cell{width:12px;height:12px;border-radius:3px}
+
+/* ══ DETAIL SCREEN ══ */
+#detail-screen{align-items:center;padding:0 20px 60px}
+.detail-header{width:100%;max-width:760px;display:flex;align-items:center;gap:14px;padding:24px 0 20px}
+.back-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:all 0.2s;flex-shrink:0}
+.back-btn:hover{border-color:var(--accent);color:var(--accent)}
+.detail-title{font-family:'Playfair Display',serif;font-size:22px}
+.detail-subtitle{font-size:12px;color:var(--text3)}
+
+.tab-bar{width:100%;max-width:760px;display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px;margin-bottom:24px}
+.tab-pill{flex:1;padding:9px 16px;border-radius:8px;border:none;background:transparent;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.tab-pill.active{background:var(--accent);color:#1a1000;box-shadow:0 4px 14px rgba(232,160,32,0.35)}
+
+/* Flashcard */
+.card-wrap{width:100%;max-width:760px;perspective:1200px;margin-bottom:20px}
+.fc-3d{width:100%;height:240px;position:relative;transform-style:preserve-3d;transition:transform 0.55s cubic-bezier(0.4,0,0.2,1);cursor:pointer}
+.fc-3d.flipped{transform:rotateY(180deg)}
+.fc-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;background:var(--surface);border:1px solid var(--border2);box-shadow:var(--shadow)}
+.fc-back{transform:rotateY(180deg);background:var(--surface2)}
+.fc-type-tag{background:rgba(232,160,32,0.15);color:var(--accent);border:1px solid rgba(232,160,32,0.3);padding:4px 14px;border-radius:99px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+.fc-word{font-family:'Playfair Display',serif;font-size:44px;font-weight:700;color:var(--text);margin-bottom:6px;text-align:center}
+.fc-rom{font-family:'DM Mono',monospace;font-size:15px;color:var(--text3);margin-bottom:16px}
+.fc-listen-btn{background:var(--surface3);border:1px solid var(--border2);color:var(--neon);padding:8px 20px;border-radius:99px;font-size:13px;cursor:pointer;transition:all 0.2s}
+.fc-listen-btn:hover{background:rgba(232,160,32,0.1)}
+.fc-meaning{font-size:24px;font-weight:600;color:var(--accent);text-align:center;margin-bottom:8px}
+.fc-ko-def{font-size:13px;color:var(--text2);text-align:center;font-style:italic;margin-bottom:14px;max-width:90%;line-height:1.5}
+.fc-example{background:var(--surface3);border-left:3px solid var(--accent);border-radius:8px;padding:12px 16px;width:100%;font-size:13px;line-height:1.7;color:var(--text2)}
+.fc-example em{color:var(--text3);font-style:italic;font-size:12px;display:block;margin-top:4px}
+
+.card-nav{width:100%;max-width:760px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.nav-btn{width:44px;height:44px;border-radius:12px;border:1px solid var(--border2);background:var(--surface);color:var(--text2);font-size:18px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center}
+.nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+.page-indicator{font-family:'DM Mono',monospace;font-size:13px;color:var(--text3)}
+
+.sr-row{width:100%;max-width:760px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}
+.sr-btn{padding:11px 6px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;text-align:center}
+.sr-btn:hover{transform:translateY(-1px)}
+.sr-btn.forget{border-color:rgba(255,77,109,0.4);color:var(--red)}.sr-btn.forget:hover{background:rgba(255,77,109,0.1)}
+.sr-btn.hard{border-color:rgba(255,153,64,0.4);color:var(--orange)}.sr-btn.hard:hover{background:rgba(255,153,64,0.1)}
+.sr-btn.easy{border-color:rgba(0,200,150,0.4);color:var(--green)}.sr-btn.easy:hover{background:rgba(0,200,150,0.1)}
+.sr-btn.veryeasy{border-color:rgba(232,160,32,0.4);color:var(--gold)}.sr-btn.veryeasy:hover{background:rgba(232,160,32,0.1)}
+.sr-next-time{font-size:10px;display:block;color:var(--text3);margin-top:2px}
+
+.urgent-btn{width:100%;max-width:760px;padding:11px;border-radius:var(--radius-sm);border:1px solid rgba(255,77,109,0.2);background:rgba(255,77,109,0.05);color:var(--red);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;margin-bottom:6px}
+.urgent-btn:hover{background:rgba(255,77,109,0.12)}
+.auto-btn{width:100%;max-width:760px;padding:11px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s}
+.auto-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(232,160,32,0.08)}
+
+/* AI panel */
+.ai-panel{width:100%;max-width:760px;background:var(--surface);border:1px solid rgba(232,160,32,0.25);border-radius:var(--radius);overflow:hidden;margin-bottom:12px}
+.ai-panel-header{padding:14px 18px;background:rgba(232,160,32,0.08);border-bottom:1px solid rgba(232,160,32,0.15);display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--accent)}
+.ai-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse-dot 2s infinite}
+@keyframes pulse-dot{0%,100%{box-shadow:0 0 0 0 rgba(232,160,32,0.5)}50%{box-shadow:0 0 0 6px rgba(232,160,32,0)}}
+.ai-content{padding:18px;font-size:14px;color:var(--text2);line-height:1.75;min-height:60px}
+.ai-loading{display:flex;gap:4px;align-items:center;padding:4px 0}
+.ai-dot-anim{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:ai-bounce 1.2s infinite}
+.ai-dot-anim:nth-child(2){animation-delay:0.2s}.ai-dot-anim:nth-child(3){animation-delay:0.4s}
+@keyframes ai-bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
+.ai-ask-btn{width:100%;max-width:760px;padding:12px;background:rgba(232,160,32,0.08);border:1px solid rgba(232,160,32,0.25);border-radius:var(--radius-sm);color:var(--accent);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;margin-bottom:8px}
+.ai-ask-btn:hover{background:rgba(232,160,32,0.15)}
+
+/* Quiz */
+.quiz-menu{width:100%;max-width:760px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.qm-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden}
+.qm-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity 0.2s}
+.qm-card:hover{border-color:var(--border2);transform:translateY(-2px)}.qm-card:hover::before{opacity:1}
+.qm-1::before{background:linear-gradient(90deg,#3498db,#5dade2)}.qm-2::before{background:linear-gradient(90deg,var(--orange),var(--gold))}
+.qm-3::before{background:linear-gradient(90deg,var(--accent),var(--accent2))}.qm-4::before{background:linear-gradient(90deg,var(--neon),var(--neon2))}
+.qm-5::before{background:linear-gradient(90deg,var(--green),#00ffaa)}
+.qm-icon{font-size:26px;margin-bottom:8px}.qm-title{font-weight:600;font-size:14px}.qm-sub{font-size:12px;color:var(--text3);margin-top:3px}
+.quiz-area{width:100%;max-width:760px}
+.quiz-q{font-size:20px;font-weight:600;text-align:center;margin-bottom:22px;line-height:1.5}
+.quiz-q .q-word{color:var(--accent);cursor:pointer}
+.quiz-options{display:flex;flex-direction:column;gap:10px}
+.q-opt{padding:14px 20px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;transition:all 0.2s;text-align:left}
+.q-opt:hover{border-color:var(--accent);background:rgba(232,160,32,0.06)}
+.q-opt.correct{border-color:var(--green)!important;background:rgba(0,200,150,0.12)!important;color:var(--green)}
+.q-opt.wrong{border-color:var(--red)!important;background:rgba(255,77,109,0.1)!important;color:var(--red);animation:shake 0.3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.spell-input{width:100%;padding:16px 20px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Mono',monospace;font-size:22px;text-align:center;outline:none;transition:all 0.2s;letter-spacing:3px}
+.spell-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,160,32,0.15)}
+.spell-input.wrong-input{border-color:var(--red)!important;animation:shake 0.3s}
+.spell-hint{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+.sh-letter{width:36px;height:40px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:18px;font-weight:600;color:var(--accent)}
+.sh-blank{width:36px;height:40px;border-bottom:2px solid var(--text3);display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;font-family:'DM Mono',monospace;color:var(--text3);font-size:12px}
+.match-wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.match-col{display:flex;flex-direction:column;gap:10px}
+.m-btn{padding:14px 16px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all 0.2s;text-align:center}
+.m-btn:hover{border-color:var(--accent)}.m-btn.selected{border-color:var(--accent);background:rgba(232,160,32,0.12);color:var(--accent)}
+.m-btn.correct{border-color:var(--green);background:rgba(0,200,150,0.12);color:var(--green);cursor:default}
+.m-btn.wrong{border-color:var(--red);background:rgba(255,77,109,0.1);color:var(--red);animation:shake 0.3s}
+.reading-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;line-height:2.4;font-size:16px;margin-bottom:16px}
+.reading-select{background:var(--surface3);border:1px solid var(--accent);border-radius:6px;color:var(--accent);padding:3px 8px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;outline:none}
+.reading-select.correct{color:var(--green);border-color:var(--green)}.reading-select.wrong-sel{color:var(--red);border-color:var(--red)}
+.trans-btn{width:100%;padding:12px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;margin-bottom:12px}
+.trans-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;font-size:14px;color:var(--text2);font-style:italic;line-height:1.8;margin-bottom:12px;display:none}
+.quiz-back-btn{width:100%;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text3);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;margin-top:16px;transition:all 0.2s}
+.quiz-back-btn:hover{color:var(--text2);border-color:var(--border2)}
+.quiz-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);text-align:center;margin-bottom:16px}
+
+/* ══ GAME SCREEN ══ */
+#game-screen{align-items:center;padding:0 20px 60px}
+.game-header{width:100%;max-width:600px;display:flex;align-items:center;gap:14px;padding:24px 0 28px}
+.game-title{font-family:'Playfair Display',serif;font-size:22px}
+
+/* Wordle */
+.wordle-wrap{width:100%;max-width:420px;align-self:center}
+.wordle-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+.wordle-row{display:flex;gap:8px;justify-content:center}
+.w-cell{width:52px;height:52px;border:2px solid var(--border2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:20px;font-weight:600;text-transform:uppercase;transition:all 0.3s;background:var(--surface)}
+.w-cell.filled{border-color:var(--text3);transform:scale(1.05)}
+.w-cell.correct{background:var(--green);border-color:var(--green);color:white}
+.w-cell.present{background:var(--gold);border-color:var(--gold);color:#1a1a1a}
+.w-cell.absent{background:var(--surface3);border-color:var(--surface3);color:var(--text3)}
+.wordle-keyboard{display:flex;flex-direction:column;gap:8px;align-items:center}
+.wk-row{display:flex;gap:6px}
+.wk-key{min-width:34px;height:48px;padding:0 6px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:'DM Mono',monospace;font-size:12px;font-weight:600;cursor:pointer;text-transform:uppercase;transition:all 0.2s;display:flex;align-items:center;justify-content:center}
+.wk-key:hover{background:var(--surface3)}.wk-key.wide{min-width:50px;font-size:10px}
+.wk-key.correct{background:var(--green);border-color:var(--green);color:white}
+.wk-key.present{background:var(--gold);border-color:var(--gold);color:#1a1a1a}
+.wk-key.absent{background:var(--surface3);color:var(--text3)}
+.wordle-hint{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 20px;font-size:14px;color:var(--text2);text-align:center;margin-bottom:18px;line-height:1.6}
+.wordle-hint strong{color:var(--neon)}
+.wordle-progress{text-align:center;font-family:'DM Mono',monospace;font-size:12px;color:var(--text3);margin-bottom:12px}
+
+/* Typing race */
+.typing-wrap{width:100%;max-width:600px}
+.typing-prompt{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;font-size:18px;color:var(--text2);text-align:center;margin-bottom:16px;line-height:1.6}
+.typing-prompt strong{color:var(--neon);font-size:22px;display:block;margin-bottom:6px}
+.typing-timer{font-family:'DM Mono',monospace;font-size:48px;font-weight:500;text-align:center;margin-bottom:16px;color:var(--gold);transition:color 0.3s}
+.typing-timer.warning{color:var(--red)}
+.typing-score-row{display:flex;gap:12px;margin-bottom:20px;width:100%}
+.typing-score-card{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center}
+.tsc-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--accent)}
+.tsc-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+.typing-input{width:100%;padding:16px 20px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Mono',monospace;font-size:18px;text-align:center;outline:none;transition:all 0.2s;letter-spacing:2px;margin-bottom:12px}
+.typing-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,160,32,0.15)}
+
+/* Dashboard */
+#dashboard-screen{align-items:center;padding:0 20px 60px}
+.dash-header{width:100%;max-width:860px;display:flex;align-items:center;gap:14px;padding:24px 0 20px}
+.dash-grid{width:100%;max-width:860px;display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.dash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px}
+.dash-card.full{grid-column:1/-1}
+.dash-card-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:18px}
+.progress-list{display:flex;flex-direction:column;gap:14px}
+.pl-top{display:flex;justify-content:space-between;margin-bottom:6px}
+.pl-name{font-size:13px;font-weight:500}
+.pl-pct{font-family:'DM Mono',monospace;font-size:12px;color:var(--text3)}
+.pl-bar{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.pl-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 0.8s ease}
+.donut-wrap{display:flex;align-items:center;gap:24px}
+.donut-svg{flex-shrink:0}
+.donut-legend{display:flex;flex-direction:column;gap:10px}
+.dl-item{display:flex;align-items:center;gap:8px;font-size:13px}
+.dl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.word-list{display:flex;flex-direction:column;gap:10px}
+.wl-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border-radius:var(--radius-sm)}
+.wl-rank{font-family:'DM Mono',monospace;font-size:12px;color:var(--text3);width:20px}
+.wl-word{font-weight:600;font-size:14px;flex:1}
+.wl-vi{font-size:12px;color:var(--text2)}
+.wl-badge{font-size:11px;padding:3px 8px;border-radius:6px;background:var(--surface3);color:var(--text3);white-space:nowrap}
+
+/* Buttons */
+.primary-btn{padding:13px 28px;border-radius:var(--radius-sm);border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#1a1000;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 20px rgba(232,160,32,0.3)}
+.primary-btn:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(232,160,32,0.4)}
+.result-banner{text-align:center;padding:24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;width:100%}
+.rb-emoji{font-size:48px;margin-bottom:8px}
+.rb-title{font-family:'Playfair Display',serif;font-size:24px;margin-bottom:6px}
+.rb-sub{font-size:14px;color:var(--text2)}
+
+/* Signature */
+.sig{position:fixed;bottom:18px;left:18px;font-size:7px;color:var(--text3);font-family:'Playfair Display',serif;font-style:italic;pointer-events:none;z-index:50}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.anim-in{animation:fadeUp 0.35s ease both}
+
+@media(max-width:500px){
+  .fc-word{font-size:32px}.wordle-row .w-cell{width:46px;height:46px;font-size:16px}
+  .dash-grid{grid-template-columns:1fr}.dash-card.full{grid-column:1}.donut-wrap{flex-direction:column}
+}
+        /* ── SYNC UI ── */
+        .sc-sync-bar{position:fixed;bottom:18px;left:18px;display:flex;align-items:center;gap:7px;z-index:9999}
+        .sc-sync-btn{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.82);border:1px solid rgba(0,0,0,0.07);border-radius:20px;padding:3px 10px;font-size:11px;color:#aaa;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.06);backdrop-filter:blur(8px);transition:background 0.2s}
+        .sc-sync-btn:hover{background:rgba(255,255,255,1)}
+        .sc-dot{width:6px;height:6px;border-radius:50%;background:#ccc;flex-shrink:0}
+        .sc-dot.synced{background:#51cf66}.sc-dot.syncing{background:#fab005;animation:sc-pulse 1s infinite}.sc-dot.error{background:#ff6b6b}
+        @keyframes sc-pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+        .sc-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:10000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+        .sc-modal{background:white;border-radius:20px;padding:26px 28px;width:390px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.15)}
+        .sc-modal h3{margin:0 0 4px;font-size:16px}.sc-modal p{font-size:12px;color:#aaa;margin:0 0 14px}
+        .sc-input{width:100%;padding:9px 12px;border:2px solid #f0f0f0;border-radius:10px;font-size:13px;font-family:monospace;outline:none;margin-bottom:8px;box-sizing:border-box}
+        .sc-input:focus{border-color:#74c0fc}
+        .sc-save-btn{width:100%;padding:11px;border:none;border-radius:12px;background:#339af0;color:white;font-weight:bold;font-size:14px;cursor:pointer}
+        .sc-save-btn:hover{background:#228be6}
+        .sc-hint{font-size:11px;color:#bbb;margin-top:10px;line-height:1.65}.sc-hint a{color:#339af0}
+        .sc-skip{display:block;text-align:center;font-size:12px;color:#ccc;margin-top:8px;cursor:pointer}.sc-skip:hover{color:#aaa}
+</style>
+</head>
+<body>
+
+    <div class="sc-sync-bar">
+        <div class="sc-sync-btn" onclick="scOpenModal()">
+            <div class="sc-dot" id="scDot"></div>
+            <span id="scLabel">Sync</span>
+        </div>
+    </div>
+    <div class="sc-modal-overlay" id="scModal">
+        <div class="sc-modal">
+            <h3>☁️ Cloud Sync</h3>
+            <p>Token &amp; Gist ID dùng chung cho tất cả các trang</p>
+            <input class="sc-input" id="scTokenInput" type="password" placeholder="GitHub Personal Access Token" autocomplete="off">
+            <input class="sc-input" id="scGistInput" type="text" placeholder="Gist ID (để trống để tạo mới)" autocomplete="off">
+            <button class="sc-save-btn" onclick="scSaveConfig()">💾 Lưu &amp; Kết nối</button>
+            <p class="sc-hint">📌 Token: <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens</a> → scope <b>gist</b><br>📌 Gist ID: lấy từ URL gist sau khi tạo lần đầu</p>
+            <span class="sc-skip" onclick="scCloseModal()">Bỏ qua</span>
+        </div>
+    </div>
+<canvas id="snow-canvas"></canvas>
+<div class="sig">cloudofdecember</div>
+
+<!-- ══ HOME SCREEN ══ -->
+<div class="screen active" id="home-screen">
+  <div class="home-header">
+    <div class="logo">Korean Vocab Lab</div>
+    <div class="header-actions">
+      <div class="streak-pill">
+        <div class="streak-badge fire" id="streak-badge">🔥 0</div>
+        <div class="streak-badge trophy" id="best-badge">🏆 0</div>
+      </div>
+      <button class="icon-btn" onclick="showDashboard()" title="Dashboard">📊</button>
+      <button class="icon-btn" onclick="toggleDark()" id="dark-btn">🌙</button>
+    </div>
+  </div>
+
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search-input" placeholder="Tìm từ tiếng Hàn, nghĩa, mô tả..." oninput="doSearch(this.value)">
+    <div id="search-results"></div>
+  </div>
+
+  <div class="stats-pills">
+    <div class="stat-pill"><span class="sp-dot green"></span><span class="sp-num" id="stat-learned">0</span><span class="sp-label">&nbsp;learned</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat-pill"><span class="sp-dot accent"></span><span class="sp-num" id="stat-review">0</span><span class="sp-label">&nbsp;to review</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat-pill"><span class="sp-dot gold"></span><span class="sp-num" id="stat-total">0</span><span class="sp-label">&nbsp;total</span></div>
+  </div>
+
+  <!-- Vocab Folders — collapsible, default open -->
+  <div class="section-title" id="folder-section-title" style="cursor:pointer;user-select:none;" onclick="toggleFolders()">
+    Vocabulary Folders <span id="folder-toggle-icon" style="font-size:9px;opacity:0.6;margin-left:4px;">▲</span>
+  </div>
+  <div class="folder-grid" id="folder-grid"></div>
+
+  <!-- Mini-games below folders -->
+  <div class="section-title">Mini-games</div>
+  <div class="games-grid">
+    <div class="game-card" onclick="startWordle()">
+      <div class="gc-glow" style="background:radial-gradient(circle at 50% 0%,rgba(0,200,150,0.1),transparent 70%)"></div>
+      <div class="gc-icon">🟩</div>
+      <div class="gc-title">Wordle</div>
+      <div class="gc-desc">Guess 10 words — 3 tries each</div>
+      <div class="gc-best" id="best-wordle"></div>
+    </div>
+    <div class="game-card" onclick="startTypingRace()">
+      <div class="gc-glow" style="background:radial-gradient(circle at 50% 0%,rgba(232,160,32,0.15),transparent 70%)"></div>
+      <div class="gc-icon">⚡</div>
+      <div class="gc-title">Typing Race</div>
+      <div class="gc-desc">Listen and type as fast as you can</div>
+      <div class="gc-best" id="best-typing"></div>
+    </div>
+    <div class="game-card" onclick="startListenGame()">
+      <div class="gc-glow" style="background:radial-gradient(circle at 50% 0%,rgba(240,192,64,0.15),transparent 70%)"></div>
+      <div class="gc-icon">🎧</div>
+      <div class="gc-title">Dictation</div>
+      <div class="gc-desc">Listen and type the correct word</div>
+      <div class="gc-best" id="best-dictation"></div>
+    </div>
+    <div class="game-card" onclick="startMeaningGame()">
+      <div class="gc-glow" style="background:radial-gradient(circle at 50% 0%,rgba(0,200,150,0.12),transparent 70%)"></div>
+      <div class="gc-icon">🧩</div>
+      <div class="gc-title">Guess the Word</div>
+      <div class="gc-desc">Read the English definition, pick the word</div>
+      <div class="gc-best" id="best-meaning"></div>
+    </div>
+  </div>
+
+  <div class="section-title">Activity</div>
+  <div class="heatmap-wrap">
+    <div class="heatmap-title">Last 16 weeks</div>
+    <div class="heatmap-grid" id="heatmap-grid"></div>
+    <div class="hm-legend">
+      <span>Less</span>
+      <div class="hm-legend-cell" style="background:var(--surface3)"></div>
+      <div class="hm-legend-cell" style="background:rgba(232,160,32,0.2)"></div>
+      <div class="hm-legend-cell" style="background:rgba(232,160,32,0.45)"></div>
+      <div class="hm-legend-cell" style="background:rgba(232,160,32,0.7)"></div>
+      <div class="hm-legend-cell" style="background:var(--accent)"></div>
+      <span>More</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DETAIL SCREEN ══ -->
+<div class="screen" id="detail-screen">
+  <div class="detail-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div>
+      <div class="detail-title" id="detail-title">Day 1</div>
+      <div class="detail-subtitle" id="detail-subtitle">4 words</div>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-pill active" onclick="switchTab('study')">📖 Study</button>
+    <button class="tab-pill" onclick="switchTab('quiz')">🎯 Practice</button>
+  </div>
+
+  <!-- Study tab -->
+  <div id="study-tab">
+    <div class="card-wrap">
+      <div class="fc-3d" id="main-card" onclick="flipCard()">
+        <div class="fc-face fc-front">
+          <div class="fc-type-tag" id="c-type">ADJ</div>
+          <div class="fc-word" id="c-ko">Word</div>
+          <div class="fc-rom" id="c-rom"></div>
+          <button class="fc-listen-btn" onclick="event.stopPropagation();playCurrentWord()">🔊 Listen</button>
+        </div>
+        <div class="fc-face fc-back">
+          <div class="fc-meaning" id="c-vi">Meaning</div>
+          <div class="fc-ko-def" id="c-ko-def"></div>
+          <div class="fc-example">
+            <b id="c-ex-ko"></b>
+            <em id="c-ex-vi"></em>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-nav">
+      <button class="nav-btn" onclick="moveCard(-1)">←</button>
+      <span class="page-indicator" id="page-num">1 / 4</span>
+      <button class="nav-btn" onclick="moveCard(1)">→</button>
+    </div>
+    <div id="sr-row-wrap">
+      <div class="sr-row">
+        <button class="sr-btn forget" onclick="submitSR(0)">😓 Forgot<span class="sr-next-time">Review soon</span></button>
+        <button class="sr-btn hard" onclick="submitSR(1)">😐 Hard<span class="sr-next-time">+1 day</span></button>
+        <button class="sr-btn easy" onclick="submitSR(2)">😊 Easy<span class="sr-next-time">+3 days</span></button>
+        <button class="sr-btn veryeasy" onclick="submitSR(3)">🚀 Very easy<span class="sr-next-time">+1 week</span></button>
+      </div>
+      <button class="urgent-btn" onclick="markUrgent()">🔥 Mark for urgent review</button>
+      <button class="auto-btn" id="auto-btn" onclick="toggleAutoPlay()">▶ Auto Play: OFF</button>
+    </div>
+    <button class="ai-ask-btn" id="ai-ask-btn" onclick="askAI()">✨ AI Explain this word</button>
+    <div class="ai-panel" id="ai-panel" style="display:none;">
+      <div class="ai-panel-header">
+        <div class="ai-dot"></div>
+        ✨ AI Explanation
+        <button onclick="hideAI()" style="margin-left:auto;background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;">✕</button>
+      </div>
+      <div class="ai-content" id="ai-content"></div>
+    </div>
+  </div>
+
+  <!-- Quiz tab -->
+  <div id="quiz-tab" style="display:none;">
+    <div id="quiz-menu" class="quiz-menu">
+      <div class="qm-card qm-1" onclick="startQuiz(1)">
+        <div class="qm-icon">🔤</div>
+        <div class="qm-title">Multiple Choice</div>
+        <div class="qm-sub">Choose the correct meaning</div>
+      </div>
+      <div class="qm-card qm-2" onclick="startQuiz(2)">
+        <div class="qm-icon">✍️</div>
+        <div class="qm-title">Spelling</div>
+        <div class="qm-sub">Type the word from its meaning</div>
+      </div>
+      <div class="qm-card qm-3" onclick="startQuiz(3)">
+        <div class="qm-icon">🔗</div>
+        <div class="qm-title">Matching</div>
+        <div class="qm-sub">Match words to meanings</div>
+      </div>
+      <div class="qm-card qm-4" id="reading-btn" onclick="startQuiz(4)">
+        <div class="qm-icon">📝</div>
+        <div class="qm-title">Reading</div>
+        <div class="qm-sub">Fill in the blanks</div>
+      </div>
+    </div>
+    <div id="quiz-area" style="display:none;">
+      <div class="quiz-label" id="quiz-label">Multiple Choice</div>
+      <div class="quiz-area" id="quiz-content"></div>
+      <button class="quiz-back-btn" onclick="backToQuizMenu()">← Back to menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ GAME SCREEN ══ -->
+<div class="screen" id="game-screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="game-title" id="game-title">Game</div>
+  </div>
+  <div id="game-content" style="width:100%;max-width:600px;display:flex;flex-direction:column;align-items:center;padding:0 0 40px;"></div>
+</div>
+
+<!-- ══ DASHBOARD SCREEN ══ -->
+<div class="screen" id="dashboard-screen">
+  <div class="dash-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div>
+      <div class="detail-title">Dashboard</div>
+      <div class="detail-subtitle">Your learning progress & stats</div>
+    </div>
+  </div>
+  <div class="dash-grid" id="dash-grid"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// ██████╗  █████╗ ████████╗ █████╗
+// ██╔══██╗██╔══██╗╚══██╔══╝██╔══██╗
+// ██║  ██║███████║   ██║   ███████║
+// ██║  ██║██╔══██║   ██║   ██╔══██║
+// ██████╔╝██║  ██║   ██║   ██║  ██║
+// ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
+// ══════════════════════════════════════════════════════
+
+// ── ADD/EDIT VOCABULARY HERE ──
+// Format mỗi từ: { ko (từ tiếng Hàn), rom (romanization), type, vi (nghĩa TV), ko_def (giải thích tiếng Hàn), ex_ko, ex_vi }
+// Format mỗi folder: { words:[...], description:"...", passage, mapping, translation }
+const VOCAB_DATA = {
+  "Ngày 1": {
+    description: "Cảm xúc & tính cách cơ bản",
+    words: [
+      {
+        ko: "행복하다", rom: "haengbokhada", type: "Tính từ",
+        vi: "Hạnh phúc, vui vẻ",
+        ko_def: "기쁨과 만족감을 느끼는 상태",
+        ex_ko: "오늘은 정말 행복한 날이에요.",
+        ex_vi: "Hôm nay thực sự là một ngày hạnh phúc."
+      },
+      {
+        ko: "슬프다", rom: "seulpeuda", type: "Tính từ",
+        vi: "Buồn bã, đau lòng",
+        ko_def: "마음이 아프고 눈물이 날 것 같은 느낌",
+        ex_ko: "영화가 너무 슬퍼서 울었어요.",
+        ex_vi: "Bộ phim buồn quá nên tôi đã khóc."
+      },
+      {
+        ko: "화나다", rom: "hwanada", type: "Động từ",
+        vi: "Tức giận, nổi giận",
+        ko_def: "분노를 느끼거나 감정이 격해지다",
+        ex_ko: "거짓말을 들었을 때 화가 났어요.",
+        ex_vi: "Tôi tức giận khi nghe thấy lời nói dối."
+      },
+      {
+        ko: "무섭다", rom: "museopda", type: "Tính từ",
+        vi: "Đáng sợ, sợ hãi",
+        ko_def: "두려움을 느끼게 하는 상태나 느낌",
+        ex_ko: "밤에 혼자 있으면 무서워요.",
+        ex_vi: "Tôi sợ khi ở một mình vào ban đêm."
+      },
+      {
+        ko: "부끄럽다", rom: "bukkeureopda", type: "Tính từ",
+        vi: "Xấu hổ, ngượng ngùng",
+        ko_def: "남들 앞에서 창피하거나 얼굴이 붉어지는 느낌",
+        ex_ko: "실수를 해서 너무 부끄러웠어요.",
+        ex_vi: "Tôi rất xấu hổ vì đã mắc lỗi."
+      }
+    ],
+    passage: "어제 저는 친구의 생일 파티에 갔어요. 파티에서 노래를 불렀는데 (1)________ 목소리로 잘 불렀어요. 친구가 선물을 받고 정말 (2)________ 표정을 지었어요. 하지만 케이크가 없어서 조금 (3)________ 순간도 있었어요. 제가 깜짝 선물을 숨겨뒀을 때 친구가 (4)________ 얼굴을 했어요.",
+    mapping: { "(1)": "무섭다", "(2)": "행복하다", "(3)": "슬프다", "(4)": "부끄럽다" },
+    translation: "Hôm qua tôi đi dự tiệc sinh nhật của bạn. Tôi hát một bài hát tại buổi tiệc. Bạn tôi nhận quà với nét mặt rất hạnh phúc."
+  },
+  "Ngày 2": {
+    description: "Hành động & hoạt động hàng ngày",
+    words: [
+      {
+        ko: "공부하다", rom: "gongbuhada", type: "Động từ",
+        vi: "Học bài, học tập",
+        ko_def: "지식이나 기술을 배우기 위해 노력하다",
+        ex_ko: "저는 매일 한국어를 공부해요.",
+        ex_vi: "Tôi học tiếng Hàn mỗi ngày."
+      },
+      {
+        ko: "요리하다", rom: "yorihada", type: "Động từ",
+        vi: "Nấu ăn",
+        ko_def: "음식을 만들거나 재료를 익혀서 먹을 수 있게 만들다",
+        ex_ko: "엄마는 맛있는 음식을 요리해요.",
+        ex_vi: "Mẹ nấu những món ăn ngon."
+      },
+      {
+        ko: "산책하다", rom: "sanchaekada", type: "Động từ",
+        vi: "Đi dạo, tản bộ",
+        ko_def: "천천히 걸으며 바깥 공기를 마시다",
+        ex_ko: "저녁마다 공원에서 산책해요.",
+        ex_vi: "Tôi đi dạo ở công viên mỗi buổi tối."
+      },
+      {
+        ko: "쉬다", rom: "swida", type: "Động từ",
+        vi: "Nghỉ ngơi",
+        ko_def: "피곤함을 풀기 위해 활동을 멈추다",
+        ex_ko: "주말에는 집에서 쉬고 싶어요.",
+        ex_vi: "Cuối tuần tôi muốn nghỉ ngơi ở nhà."
+      },
+      {
+        ko: "이야기하다", rom: "iyagihada", type: "Động từ",
+        vi: "Nói chuyện, trò chuyện",
+        ko_def: "서로 말을 주고받으며 대화를 나누다",
+        ex_ko: "친구와 오랫동안 이야기했어요.",
+        ex_vi: "Tôi đã nói chuyện với bạn bè rất lâu."
+      }
+    ],
+    passage: "오늘 저는 아침에 일찍 일어났어요. 먼저 30분 동안 한국어를 (1)________. 그 다음에 아침 식사를 (2)________. 식사 후에 공원에서 (3)________. 집에 돌아와서 소파에서 (4)________. 저녁에는 친구에게 전화해서 오늘 하루에 대해 (5)________.",
+    mapping: { "(1)": "공부하다", "(2)": "요리하다", "(3)": "산책하다", "(4)": "쉬다", "(5)": "이야기하다" },
+    translation: "Hôm nay tôi dậy sớm. Trước tiên tôi học tiếng Hàn 30 phút. Sau đó nấu bữa sáng. Sau bữa ăn tôi đi dạo ở công viên. Về nhà nghỉ ngơi trên ghế sofa. Tối gọi điện cho bạn kể về ngày hôm nay."
+  },
+  "Ngày 3": {
+    description: "Tính từ mô tả người & sự vật",
+    words: [
+      {
+        ko: "예쁘다", rom: "yeppeuda", type: "Tính từ",
+        vi: "Xinh đẹp, dễ thương",
+        ko_def: "보기에 아름답고 좋은 느낌을 주다",
+        ex_ko: "저 꽃이 정말 예뻐요.",
+        ex_vi: "Bông hoa kia thực sự rất xinh đẹp."
+      },
+      {
+        ko: "크다", rom: "keuda", type: "Tính từ",
+        vi: "To, lớn",
+        ko_def: "부피나 크기가 보통보다 더 많다",
+        ex_ko: "우리 학교는 아주 커요.",
+        ex_vi: "Trường tôi rất lớn."
+      },
+      {
+        ko: "빠르다", rom: "ppareuda", type: "Tính từ",
+        vi: "Nhanh chóng",
+        ko_def: "움직임이나 속도가 매우 빠른 상태",
+        ex_ko: "KTX는 아주 빠른 기차예요.",
+        ex_vi: "KTX là chuyến tàu rất nhanh."
+      },
+      {
+        ko: "맛있다", rom: "masitda", type: "Tính từ",
+        vi: "Ngon, ngon miệng",
+        ko_def: "음식의 맛이 좋고 먹기 즐거운 상태",
+        ex_ko: "이 떡볶이가 정말 맛있어요.",
+        ex_vi: "Món tteokbokki này thực sự rất ngon."
+      },
+      {
+        ko: "어렵다", rom: "eoryeopda", type: "Tính từ",
+        vi: "Khó, khó khăn",
+        ko_def: "이해하거나 수행하기 힘든 상태",
+        ex_ko: "한국어 문법이 조금 어려워요.",
+        ex_vi: "Ngữ pháp tiếng Hàn hơi khó."
+      }
+    ],
+    passage: "한국 여행은 정말 (1)________ 경험이었어요. 서울은 생각보다 훨씬 (2)________ 도시였어요. 지하철도 (3)________ 도착했어요. 길거리 음식은 정말 (4)________. 처음에는 한국어로 주문하는 것이 (5)________ 지만 곧 익숙해졌어요.",
+    mapping: { "(1)": "예쁘다", "(2)": "크다", "(3)": "빠르다", "(4)": "맛있다", "(5)": "어렵다" },
+    translation: "Chuyến du lịch Hàn Quốc thực sự là một trải nghiệm tuyệt đẹp. Seoul là thành phố lớn hơn tôi nghĩ. Tàu điện ngầm đến rất nhanh. Đồ ăn đường phố ngon tuyệt. Lúc đầu đặt món bằng tiếng Hàn khó nhưng dần quen."
+  }
+};
+
+// ══════════════════════════════════
+// STATE
+// ══════════════════════════════════
+const db = VOCAB_DATA;
+let currentDay = Object.keys(db)[0];
+let currentIndex = 0;
+let isReviewMode = false;
+let reviewQueue = [];
+let isFlipped = false;
+let isAutoPlaying = false;
+let autoTimer = null;
+let matchData = { ko: null, vi: null, koBtn: null, viBtn: null };
+
+let sr_data = JSON.parse(localStorage.getItem('lexis_sr')) || {};
+let views = JSON.parse(localStorage.getItem('lexis_views')) || {};
+let customNames = JSON.parse(localStorage.getItem('lexis_names')) || {};
+let customDescs = JSON.parse(localStorage.getItem('lexis_descs')) || {};
+let activityLog = JSON.parse(localStorage.getItem('lexis_activity')) || {};
+let highScores = JSON.parse(localStorage.getItem('lexis_scores')) || {};
+let foldersVisible = true;
+let aiCache = {};
+
+// ══════════════════════════════════
+// SNOW EFFECT
+// ══════════════════════════════════
+(function initSnow() {
+  const canvas = document.getElementById('snow-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, flakes = [];
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+  for (let i = 0; i < 80; i++) flakes.push({
+    x: Math.random() * W, y: Math.random() * H,
+    r: Math.random() * 2.5 + 0.5,
+    speed: Math.random() * 0.8 + 0.2,
+    drift: Math.random() * 0.4 - 0.2,
+    opacity: Math.random() * 0.5 + 0.1
+  });
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    flakes.forEach(f => {
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,230,150,${f.opacity})`;
+      ctx.fill();
+      f.y += f.speed; f.x += f.drift;
+      if (f.y > H + 5) { f.y = -5; f.x = Math.random() * W; }
+      if (f.x > W + 5) f.x = -5;
+      if (f.x < -5) f.x = W + 5;
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ══════════════════════════════════
+// SCREENS
+// ══════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome() {
+  if (isAutoPlaying) toggleAutoPlay();
+  showScreen('home-screen');
+  renderFolders();
+  renderHeatmap();
+  renderStats();
+  renderGameBests();
+}
+
+// ══════════════════════════════════
+// STREAK
+// ══════════════════════════════════
+function updateStreak() {
+  let s = JSON.parse(localStorage.getItem('lexis_streak')) || { count: 0, lastDate: null, best: 0 };
+  const today = new Date().toDateString();
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+  if (s.lastDate === today) return;
+  s.count = s.lastDate === yesterday.toDateString() ? s.count + 1 : 1;
+  if (s.count > s.best) s.best = s.count;
+  s.lastDate = today;
+  localStorage.setItem('lexis_streak', JSON.stringify(s));
+  displayStreak();
+  logActivity();
+}
+function logActivity() {
+  const key = new Date().toISOString().slice(0, 10);
+  activityLog[key] = (activityLog[key] || 0) + 1;
+  localStorage.setItem('lexis_activity', JSON.stringify(activityLog));
+}
+function displayStreak() {
+  const s = JSON.parse(localStorage.getItem('lexis_streak')) || { count: 0, best: 0 };
+  document.getElementById('streak-badge').textContent = `🔥 ${s.count}`;
+  document.getElementById('best-badge').textContent = `🏆 ${s.best}`;
+}
+
+// ══════════════════════════════════
+// HIGH SCORES
+// ══════════════════════════════════
+function saveScore(game, score) {
+  if (!highScores[game] || score > highScores[game]) {
+    highScores[game] = score;
+    localStorage.setItem('lexis_scores', JSON.stringify(highScores));
+  }
+}
+function renderGameBests() {
+  const games = { 'wordle': 'best-wordle', 'typing': 'best-typing', 'dictation': 'best-dictation', 'meaning': 'best-meaning' };
+  const labels = { 'wordle': 'Best: ', 'typing': 'Best: ', 'dictation': 'Best: ', 'meaning': 'Best: ' };
+  const units = { 'wordle': '/10 correct', 'typing': ' pts', 'dictation': '/10 correct', 'meaning': '/10 correct' };
+  Object.keys(games).forEach(g => {
+    const el = document.getElementById(games[g]);
+    if (el) el.textContent = highScores[g] != null ? `${labels[g]}${highScores[g]}${units[g]}` : '';
+  });
+}
+
+// ══════════════════════════════════
+// STATS
+// ══════════════════════════════════
+function renderStats() {
+  let total = 0, learned = 0;
+  Object.values(db).forEach(d => {
+    total += d.words.length;
+    d.words.forEach(w => { if (sr_data[w.ko] && sr_data[w.ko].interval > 0) learned++; });
+  });
+  const now = Date.now();
+  reviewQueue = [];
+  Object.values(db).forEach(d => d.words.forEach(w => {
+    if (sr_data[w.ko] && sr_data[w.ko].nextReview <= now) reviewQueue.push(w);
+  }));
+  document.getElementById('stat-learned').textContent = learned;
+  document.getElementById('stat-review').textContent = reviewQueue.length;
+  document.getElementById('stat-total').textContent = total;
+}
+
+// ══════════════════════════════════
+// HEATMAP
+// ══════════════════════════════════
+function renderHeatmap() {
+  const grid = document.getElementById('heatmap-grid');
+  grid.innerHTML = '';
+  const today = new Date();
+  for (let i = 111; i >= 0; i--) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    const count = Math.min(activityLog[key] || 0, 4);
+    const cell = document.createElement('div');
+    cell.className = 'hm-cell';
+    cell.setAttribute('data-count', count);
+    cell.title = `${key}: ${activityLog[key] || 0} activities`;
+    grid.appendChild(cell);
+  }
+}
+
+// ══════════════════════════════════
+// FOLDERS
+// ══════════════════════════════════
+function renderFolders() {
+  const grid = document.getElementById('folder-grid');
+  grid.innerHTML = '';
+  // Keep current visibility
+  grid.style.display = foldersVisible ? 'grid' : 'none';
+  document.getElementById('folder-toggle-icon').textContent = foldersVisible ? '▲' : '▼';
+
+  // Review folder
+  const rev = document.createElement('div');
+  rev.className = 'folder-card' + (reviewQueue.length > 0 ? ' urgent' : '');
+  rev.innerHTML = `
+    <div class="fc-icon">${reviewQueue.length > 0 ? '🔥' : '✅'}</div>
+    <div class="fc-title">Review</div>
+    <div class="fc-desc-text">${reviewQueue.length > 0 ? 'Words due for review' : 'All caught up!'}</div>
+    <div class="fc-sub">${reviewQueue.length > 0 ? reviewQueue.length + ' words due' : '0 due'}</div>
+    <div class="fc-prog-wrap"><div class="fc-prog" style="width:${reviewQueue.length > 0 ? 80 : 100}%"></div></div>`;
+  rev.onclick = () => {
+    if (reviewQueue.length === 0) { showToast('🎉 No words to review!'); return; }
+    isReviewMode = true; openDay('review');
+  };
+  grid.appendChild(rev);
+
+  Object.keys(db).forEach(day => {
+    const words = db[day].words;
+    const learned = words.filter(w => sr_data[w.ko] && sr_data[w.ko].interval > 0).length;
+    const pct = Math.round(learned / words.length * 100);
+    const desc = customDescs[day] || db[day].description || 'No description';
+    const displayName = customNames[day] || day;
+
+    const card = document.createElement('div');
+    card.className = 'folder-card';
+    card.innerHTML = `
+      <button class="fc-edit" onclick="editFolder(event,'${day}')">✏️</button>
+      <div class="fc-icon">📁</div>
+      <div class="fc-title">${displayName}</div>
+      <div class="fc-desc-text" title="${desc}">${desc}</div>
+      <div class="fc-sub">${words.length} words · ${pct}%</div>
+      <div class="fc-prog-wrap"><div class="fc-prog" style="width:${pct}%"></div></div>`;
+    card.onclick = () => { isReviewMode = false; openDay(day); };
+    grid.appendChild(card);
+  });
+}
+
+function editFolder(e, day) {
+  e.stopPropagation();
+  // Create inline modal overlay
+  const currentName = customNames[day] || day;
+  const currentDesc = customDescs[day] || db[day].description || '';
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  overlay.innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:28px;width:100%;max-width:400px;box-shadow:var(--shadow);">
+      <div style="font-family:'Playfair Display',serif;font-size:18px;margin-bottom:20px;">Edit Folder</div>
+      <label style="display:block;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">Name</label>
+      <input id="ef-name" value="${currentName}" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;margin-bottom:16px;" />
+      <label style="display:block;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">Description</label>
+      <input id="ef-desc" value="${currentDesc}" placeholder="No description" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;margin-bottom:22px;" />
+      <div style="display:flex;gap:10px;">
+        <button id="ef-cancel" style="flex:1;padding:11px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;">Cancel</button>
+        <button id="ef-save" style="flex:1;padding:11px;border-radius:var(--radius-sm);border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#1a1000;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">Save</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('ef-name').focus();
+  document.getElementById('ef-cancel').onclick = () => overlay.remove();
+  overlay.onclick = (ev) => { if (ev.target === overlay) overlay.remove(); };
+  document.getElementById('ef-save').onclick = () => {
+    const n = document.getElementById('ef-name').value.trim();
+    const d = document.getElementById('ef-desc').value.trim();
+    if (n) customNames[day] = n;
+    customDescs[day] = d || 'No description';
+    localStorage.setItem('lexis_names', JSON.stringify(customNames));
+    localStorage.setItem('lexis_descs', JSON.stringify(customDescs));
+    overlay.remove();
+    renderFolders();
+  };
+  // Enter to save
+  overlay.addEventListener('keydown', ev => { if (ev.key === 'Enter') document.getElementById('ef-save').click(); if (ev.key === 'Escape') overlay.remove(); });
+}
+
+function toggleFolders() {
+  foldersVisible = !foldersVisible;
+  const grid = document.getElementById('folder-grid');
+  grid.style.display = foldersVisible ? 'grid' : 'none';
+  document.getElementById('folder-toggle-icon').textContent = foldersVisible ? '▲' : '▼';
+}
+
+// ══════════════════════════════════
+// SEARCH (words + description)
+// ══════════════════════════════════
+function doSearch(q) {
+  const box = document.getElementById('search-results');
+  if (!q.trim()) { box.innerHTML = ''; return; }
+  const ql = q.toLowerCase();
+  let html = '';
+  Object.keys(db).forEach(day => {
+    const folderDesc = (customDescs[day] || db[day].description || '').toLowerCase();
+    db[day].words.forEach(w => {
+      const matchWord = w.ko.toLowerCase().includes(ql) || w.vi.toLowerCase().includes(ql) || w.rom.includes(ql);
+      const matchDesc = folderDesc.includes(ql) || (w.ko_def || '').toLowerCase().includes(ql);
+      if (matchWord || matchDesc) {
+        html += `<div class="search-item">
+          <div onclick="openDay('${day}');doSearchClick('${w.ko}')" style="flex:1;cursor:pointer;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="si-word">${w.ko}</div>
+              <span style="background:rgba(232,160,32,0.15);color:var(--accent);border:1px solid rgba(232,160,32,0.3);padding:2px 8px;border-radius:99px;font-size:10px;font-weight:600;">${w.type}</span>
+            </div>
+            <div class="si-vi">${w.rom} · ${w.vi}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+            <button onclick="event.stopPropagation();playSound('${w.ko}')" style="background:var(--surface3);border:1px solid var(--border2);color:var(--accent);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;">🔊</button>
+            <div class="si-tag">${customNames[day] || day}</div>
+          </div>
+        </div>`;
+      }
+    });
+  });
+  box.innerHTML = html || `<div style="padding:16px;text-align:center;color:var(--text3);font-size:14px;">No results found</div>`;
+}
+function doSearchClick(ko) {
+  document.getElementById('search-results').innerHTML = '';
+  document.getElementById('search-input').value = '';
+  const list = isReviewMode ? reviewQueue : db[currentDay].words;
+  const idx = list.findIndex(w => w.ko === ko);
+  if (idx >= 0) { currentIndex = idx; updateCard(); }
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.search-wrap')) document.getElementById('search-results').innerHTML = '';
+});
+
+// ══════════════════════════════════
+// OPEN DAY / CARD
+// ══════════════════════════════════
+function openDay(day) {
+  if (!isReviewMode) currentDay = day;
+  currentIndex = 0; isFlipped = false;
+  document.getElementById('detail-title').textContent = isReviewMode ? '🔥 Review' : (customNames[day] || day);
+  const words = isReviewMode ? reviewQueue : db[day].words;
+  document.getElementById('detail-subtitle').textContent = words.length + ' words';
+  document.getElementById('reading-btn').style.display = isReviewMode ? 'none' : '';
+  hideAI();
+  showScreen('detail-screen');
+  switchTab('study');
+  updateCard();
+}
+
+function updateCard() {
+  const list = isReviewMode ? reviewQueue : db[currentDay].words;
+  if (!list || list.length === 0) { goHome(); return; }
+  const w = list[currentIndex];
+  isFlipped = false;
+  document.getElementById('main-card').classList.remove('flipped');
+  document.getElementById('c-ko').textContent = w.ko;
+  document.getElementById('c-rom').textContent = w.rom;
+  document.getElementById('c-vi').textContent = w.vi;
+  document.getElementById('c-type').textContent = w.type;
+  document.getElementById('c-ko-def').textContent = w.ko_def || '';
+  document.getElementById('c-ex-ko').textContent = w.ex_ko;
+  document.getElementById('c-ex-vi').textContent = w.ex_vi;
+  document.getElementById('page-num').textContent = `${currentIndex + 1} / ${list.length}`;
+  views[w.ko] = (views[w.ko] || 0) + 1;
+  localStorage.setItem('lexis_views', JSON.stringify(views));
+  if (!isAutoPlaying) setTimeout(() => playSound(w.ko), 250);
+  logActivity(); updateStreak(); hideAI();
+}
+function flipCard() {
+  isFlipped = !isFlipped;
+  document.getElementById('main-card').classList.toggle('flipped', isFlipped);
+}
+function moveCard(n) {
+  const list = isReviewMode ? reviewQueue : db[currentDay].words;
+  currentIndex = (currentIndex + n + list.length) % list.length;
+  updateCard();
+}
+
+// ══════════════════════════════════
+// SR SYSTEM
+// ══════════════════════════════════
+function submitSR(level, wordOverride) {
+  updateStreak(); logActivity();
+  const list = isReviewMode ? reviewQueue : db[currentDay].words;
+  const word = wordOverride || list[currentIndex];
+  if (!word) return;
+  if (!sr_data[word.ko]) sr_data[word.ko] = { interval: 0, nextReview: 0 };
+  let p = sr_data[word.ko];
+  switch (level) {
+    case 0: p.interval = 0; p.nextReview = Date.now() + 600000; break;
+    case 1: p.interval = p.interval === 0 ? 1 : Math.round(p.interval * 1.2); break;
+    case 2: p.interval = p.interval <= 1 ? 3 : Math.round(p.interval * 2.5); break;
+    case 3: p.interval = p.interval === 0 ? 4 : Math.round(p.interval * 4); break;
+  }
+  if (p.interval > 0) { const d = new Date(); d.setDate(d.getDate() + p.interval); p.nextReview = d.getTime(); }
+  localStorage.setItem('lexis_sr', JSON.stringify(sr_data)); scSchedulePush();
+  if (!wordOverride) {
+    if (isReviewMode && level > 0) {
+      reviewQueue.splice(currentIndex, 1);
+      if (reviewQueue.length === 0) { goHome(); return; }
+      if (currentIndex >= reviewQueue.length) currentIndex = 0;
+      updateCard();
+    } else moveCard(1);
+  }
+}
+function markUrgent() {
+  const list = isReviewMode ? reviewQueue : db[currentDay].words;
+  const w = list[currentIndex];
+  sr_data[w.ko] = { interval: 0, nextReview: Date.now() - 1000 };
+  localStorage.setItem('lexis_sr', JSON.stringify(sr_data));
+  showToast('🔥 Marked for urgent review!');
+}
+
+// ══════════════════════════════════
+// AUTO PLAY
+// ══════════════════════════════════
+function toggleAutoPlay() {
+  isAutoPlaying = !isAutoPlaying;
+  const btn = document.getElementById('auto-btn');
+  if (isAutoPlaying) { btn.textContent = '⏹ Stop Auto Play'; btn.classList.add('on'); runAuto(); }
+  else { btn.textContent = '▶ Auto Play: OFF'; btn.classList.remove('on'); clearTimeout(autoTimer); document.getElementById('main-card').classList.remove('flipped'); isFlipped = false; }
+}
+function runAuto() {
+  if (!isAutoPlaying) return;
+  const list = isReviewMode ? reviewQueue : db[currentDay].words;
+  if (!list || !list.length) { toggleAutoPlay(); return; }
+  const w = list[currentIndex].ko;
+  playSound(w);
+  autoTimer = setTimeout(() => {
+    if (!isAutoPlaying) return;
+    flipCard(); playSound(w);
+    autoTimer = setTimeout(() => {
+      if (!isAutoPlaying) return;
+      moveCard(1); runAuto();
+    }, 2500);
+  }, 1400);
+}
+
+// ══════════════════════════════════
+// TABS
+// ══════════════════════════════════
+function switchTab(tab) {
+  if (isAutoPlaying) toggleAutoPlay();
+  document.querySelectorAll('.tab-pill').forEach((p, i) => p.classList.toggle('active', (i === 0) === (tab === 'study')));
+  const st = document.getElementById('study-tab');
+  const qt = document.getElementById('quiz-tab');
+  st.style.cssText = tab === 'study' ? 'display:flex;flex-direction:column;align-items:center;width:100%;max-width:760px;' : 'display:none;';
+  qt.style.cssText = tab === 'quiz' ? 'display:flex;flex-direction:column;align-items:center;width:100%;max-width:760px;' : 'display:none;';
+  if (tab === 'quiz') { document.getElementById('quiz-menu').style.display = 'grid'; document.getElementById('quiz-area').style.display = 'none'; }
+}
+
+// ══════════════════════════════════
+// SOUND
+// ══════════════════════════════════
+function playSound(text) {
+  window.speechSynthesis.cancel();
+  const msg = new SpeechSynthesisUtterance(text);
+  msg.lang = 'ko-KR'; msg.rate = 0.9;
+  window.speechSynthesis.speak(msg);
+}
+function playCurrentWord() {
+  const list = isReviewMode ? reviewQueue : db[currentDay].words;
+  if (list.length > 0) playSound(list[currentIndex].ko);
+}
+
+// ══════════════════════════════════
+// AI EXPLAIN
+// ══════════════════════════════════
+function hideAI() {
+  const p = document.getElementById('ai-panel'); if (p) p.style.display = 'none';
+  const b = document.getElementById('ai-ask-btn'); if (b) b.style.display = 'block';
+}
+async function askAI() {
+  const list = isReviewMode ? reviewQueue : db[currentDay].words;
+  const w = list[currentIndex];
+  document.getElementById('ai-panel').style.display = 'block';
+  document.getElementById('ai-ask-btn').style.display = 'none';
+  const content = document.getElementById('ai-content');
+  if (aiCache[w.ko]) { content.innerHTML = aiCache[w.ko]; return; }
+  content.innerHTML = `<div class="ai-loading"><div class="ai-dot-anim"></div><div class="ai-dot-anim"></div><div class="ai-dot-anim"></div></div>`;
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': window.ANTHROPIC_API_KEY || '',
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 600,
+        system: 'Bạn là trợ lý dạy tiếng Hàn. Trả lời ngắn gọn bằng tiếng Việt. Dùng HTML đơn giản với thẻ <b> và <br>.',
+        messages: [{ role: 'user', content: `Giải thích từ tiếng Hàn "${w.ko}" (${w.type}) - phiên âm: ${w.rom} - nghĩa: ${w.vi}.\n1. Cấu tạo/hanja liên quan\n2. 2 từ liên quan/đồng nghĩa\n3. Mẹo ghi nhớ\nDưới 120 từ.` }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const text = data.content?.[0]?.text || 'No response.';
+    aiCache[w.ko] = text;
+    content.innerHTML = text;
+  } catch (e) {
+    content.innerHTML = `<div style="color:var(--text3);font-size:13px;">
+      ⚠️ AI không hoạt động trên GitHub Pages vì cần API key.<br><br>
+      <b>Cách fix:</b> Thêm dòng này vào file trước thẻ &lt;/body&gt;:<br>
+      <code style="background:var(--surface3);padding:4px 8px;border-radius:4px;display:inline-block;margin-top:6px;">
+      &lt;script&gt;window.ANTHROPIC_API_KEY = 'sk-ant-...';&lt;/script&gt;
+      </code><br><br>
+      <small>Lỗi: ${e.message}</small>
+    </div>`;
+  }
+}
+
+// ══════════════════════════════════
+// QUIZ
+// ══════════════════════════════════
+function backToQuizMenu() {
+  document.getElementById('quiz-menu').style.display = 'grid';
+  document.getElementById('quiz-area').style.display = 'none';
+}
+function startQuiz(type) {
+  document.getElementById('quiz-menu').style.display = 'none';
+  document.getElementById('quiz-area').style.display = 'block';
+  const labels = { 1: '🔤 Multiple Choice', 2: '✍️ Spelling', 3: '🔗 Matching', 4: '📝 Reading' };
+  document.getElementById('quiz-label').textContent = labels[type];
+  const words = isReviewMode ? reviewQueue : db[currentDay].words;
+  if (!words.length) { backToQuizMenu(); return; }
+  const cont = document.getElementById('quiz-content');
+  cont.innerHTML = '';
+
+  if (type === 1) {
+    const target = words[Math.floor(Math.random() * words.length)];
+    let opts = [target.vi];
+    let allVi = []; Object.values(db).forEach(d => d.words.forEach(w => allVi.push(w.vi)));
+    while (opts.length < Math.min(4, allVi.length)) {
+      const r = allVi[Math.floor(Math.random() * allVi.length)];
+      if (!opts.includes(r)) opts.push(r);
+    }
+    opts.sort(() => Math.random() - 0.5);
+    cont.innerHTML = `<div class="quiz-q"><span class="q-word" onclick="playSound('${target.ko}')">🔊 ${target.ko}</span><br><small style="font-size:13px;color:var(--text3)">${target.rom}</small></div>
+      <div class="quiz-options">${opts.map(o => `<button class="q-opt" onclick="checkMC(this,'${o.replace(/'/g,"\\'")}','${target.vi.replace(/'/g,"\\'")}',1,'${target.ko}')">${o}</button>`).join('')}</div>`;
+    setTimeout(() => playSound(target.ko), 300);
+
+  } else if (type === 2) {
+    const target = words[Math.floor(Math.random() * words.length)];
+    const hintHtml = target.ko.split('').map((ch, i) =>
+      i === 0 ? `<div class="sh-letter">${ch.toUpperCase()}</div>` : `<div class="sh-blank">${i+1}</div>`
+    ).join('');
+    cont.innerHTML = `<div class="quiz-q" style="font-size:17px;">${target.vi}</div>
+      <small style="color:var(--text3);text-align:center;display:block;margin-bottom:14px">${target.rom}</small>
+      <div class="spell-hint">${hintHtml}</div>
+      <input class="spell-input" id="spell-in" placeholder="Gõ từ tiếng Hàn..." autocomplete="off">
+      <div id="spell-answer" style="display:none;text-align:center;margin-top:10px;font-family:'DM Mono',monospace;font-size:18px;color:var(--red)"></div>
+      <button class="primary-btn" style="width:100%;margin-top:10px" onclick="checkSpell('${target.ko}')">Check ✓</button>`;
+    const inp = document.getElementById('spell-in');
+    inp.focus(); inp.onkeypress = e => { if (e.key === 'Enter') checkSpell(target.ko); };
+
+  } else if (type === 3) {
+    matchData = { ko: null, vi: null, koBtn: null, viBtn: null };
+    const sample = [...words].sort(() => Math.random() - 0.5).slice(0, Math.min(5, words.length));
+    const koWords = [...sample].sort(() => Math.random() - 0.5);
+    const vi = [...sample].sort(() => Math.random() - 0.5);
+    cont.innerHTML = `<div class="match-wrap">
+      <div class="match-col" id="mc-ko">${koWords.map(w => `<button class="m-btn" onclick="selMatch(this,'${w.ko}','ko')" data-id="${w.ko}">${w.ko}</button>`).join('')}</div>
+      <div class="match-col" id="mc-vi">${vi.map(w => `<button class="m-btn" onclick="selMatch(this,'${w.ko}','vi')" data-id="${w.ko}">${w.vi}</button>`).join('')}</div>
+    </div>`;
+
+  } else if (type === 4) {
+    if (isReviewMode) { backToQuizMenu(); return; }
+    const data = db[currentDay];
+    let passage = data.passage;
+    const optHtml = cor => {
+      const list = words.map(w => w.ko).sort(() => Math.random() - 0.5);
+      return `<select class="reading-select" onchange="checkSelect(this,'${cor}')"><option value="">—</option>${list.map(o => `<option value="${o}">${o}</option>`).join('')}</select>`;
+    };
+    Object.keys(data.mapping).forEach(k => { passage = passage.replace(k, optHtml(data.mapping[k])); });
+    cont.innerHTML = `<div class="reading-box">${passage}</div>
+      <button class="trans-btn" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">👁 Show translation</button>
+      <div class="trans-box">${data.translation}</div>`;
+  }
+}
+function checkMC(btn, sel, cor, type, ko) {
+  if (sel === cor) {
+    btn.classList.add('correct'); triggerSuccess(); submitSR(2, findWord(ko));
+    setTimeout(() => startQuiz(type), 1200);
+  } else {
+    btn.classList.add('wrong'); submitSR(0, findWord(ko));
+    setTimeout(() => btn.classList.remove('wrong'), 600);
+  }
+}
+function checkSpell(cor) {
+  const inp = document.getElementById('spell-in');
+  if (inp.value.trim().toLowerCase() === cor.toLowerCase()) {
+    inp.style.borderColor = 'var(--green)'; playSound(cor); triggerSuccess(); submitSR(2, findWord(cor));
+    setTimeout(() => startQuiz(2), 1300);
+  } else {
+    inp.classList.add('wrong-input'); submitSR(0, findWord(cor));
+    const ansBox = document.getElementById('spell-answer');
+    if (ansBox) { ansBox.style.display = 'block'; ansBox.innerHTML = `Answer: <strong style="color:var(--neon)">${cor}</strong>`; }
+    setTimeout(() => inp.classList.remove('wrong-input'), 400);
+  }
+}
+function checkSelect(el, cor) {
+  if (el.value === cor) { el.classList.add('correct'); triggerSuccess(); }
+  else { el.classList.add('wrong-sel'); setTimeout(() => { el.classList.remove('wrong-sel'); el.value = ''; }, 800); }
+}
+function selMatch(btn, id, side) {
+  if (btn.classList.contains('correct')) return;
+  if (side === 'ko') { if (matchData.koBtn) matchData.koBtn.classList.remove('selected'); matchData.ko = id; matchData.koBtn = btn; playSound(id); }
+  else { if (matchData.viBtn) matchData.viBtn.classList.remove('selected'); matchData.vi = id; matchData.viBtn = btn; }
+  btn.classList.add('selected');
+  if (matchData.ko && matchData.vi) {
+    if (matchData.ko === matchData.vi) {
+      matchData.koBtn.className = 'm-btn correct'; matchData.viBtn.className = 'm-btn correct';
+      triggerSuccess(); matchData.ko = matchData.vi = null;
+      const done = document.querySelectorAll('.m-btn.correct').length;
+      const total = document.querySelectorAll('.m-btn').length;
+      if (done >= total) setTimeout(() => startQuiz(3), 900);
+    } else {
+      matchData.koBtn.classList.add('wrong'); matchData.viBtn.classList.add('wrong');
+      submitSR(0, findWord(matchData.ko));
+      const b1 = matchData.koBtn, b2 = matchData.viBtn;
+      setTimeout(() => { b1.classList.remove('wrong','selected'); b2.classList.remove('wrong','selected'); }, 600);
+      matchData.ko = matchData.vi = null;
+    }
+  }
+}
+function findWord(ko) {
+  for (const d of Object.values(db)) {
+    const w = d.words.find(w => w.ko.toLowerCase() === en.toLowerCase());
+    if (w) return w;
+  }
+  return null;
+}
+
+// ══════════════════════════════════
+// WORDLE (10 rounds, 3 tries each)
+// ══════════════════════════════════
+let wordleState = {};
+
+function startWordle() {
+  document.getElementById('game-title').textContent = '🟩 Wordle';
+  showScreen('game-screen');
+  const allWords = [];
+  Object.values(db).forEach(d => d.words.forEach(w => { if (w.rom && w.rom.length >= 4 && w.rom.length <= 9 && !w.rom.includes(' ')) allWords.push(w); }));
+  if (allWords.length === 0) { showToast('Không đủ từ để chơi Wordle!'); goHome(); return; }
+  const shuffled = [...allWords].sort(() => Math.random() - 0.5).slice(0, 10);
+  wordleState = { targets: shuffled, round: 0, score: 0, maxTries: 3 };
+  startWordleRound();
+}
+
+function startWordleRound() {
+  const { targets, round, score, maxTries } = wordleState;
+  if (round >= targets.length) { showWordleEnd(score); return; }
+  const target = targets[round];
+  wordleState.current = '';
+  wordleState.tries = 0;
+  wordleState.done = false;
+
+  const gc = document.getElementById('game-content');
+  gc.innerHTML = `
+    <div class="wordle-progress">Round ${round + 1}/10 · Score: ${score} · ${maxTries} tries each</div>
+    <div class="wordle-hint">
+      Nghĩa: <strong>${target.vi}</strong><br>
+      <small style="color:var(--text3)">${target.type} · ${target.rom.length} chữ · đoán bằng phiên âm</small>
+    </div>
+    <div class="wordle-wrap">
+      <div class="wordle-grid" id="w-grid"></div>
+      <div class="wordle-keyboard" id="w-keyboard"></div>
+    </div>`;
+  buildWordleGrid(target.rom.length, maxTries);
+  buildWordleKeyboard();
+}
+
+function buildWordleGrid(len, rows) {
+  const grid = document.getElementById('w-grid');
+  grid.innerHTML = '';
+  for (let r = 0; r < rows; r++) {
+    const row = document.createElement('div');
+    row.className = 'wordle-row'; row.id = `wr-${r}`;
+    for (let c = 0; c < len; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'w-cell'; cell.id = `wc-${r}-${c}`;
+      row.appendChild(cell);
+    }
+    grid.appendChild(row);
+  }
+}
+function buildWordleKeyboard() {
+  const rows = [['q','w','e','r','t','y','u','i','o','p'],['a','s','d','f','g','h','j','k','l'],['ENTER','z','x','c','v','b','n','m','⌫']];
+  const kb = document.getElementById('w-keyboard'); kb.innerHTML = '';
+  rows.forEach(keys => {
+    const row = document.createElement('div'); row.className = 'wk-row';
+    keys.forEach(k => {
+      const btn = document.createElement('button');
+      btn.className = 'wk-key' + (k.length > 1 ? ' wide' : '');
+      btn.id = `wk-${k}`; btn.textContent = k;
+      btn.onclick = () => handleWordleKey(k);
+      row.appendChild(btn);
+    });
+    kb.appendChild(row);
+  });
+}
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('game-screen').classList.contains('active')) return;
+  if (!document.getElementById('w-grid')) return;
+  if (e.key === 'Enter') handleWordleKey('ENTER');
+  else if (e.key === 'Backspace') handleWordleKey('⌫');
+  else if (/^[a-zA-Z]$/.test(e.key)) handleWordleKey(e.key.toLowerCase());
+});
+function handleWordleKey(k) {
+  if (wordleState.done) return;
+  const target = wordleState.targets[wordleState.round];
+  const len = target.rom.length;
+  if (k === '⌫') {
+    if (wordleState.current.length > 0) {
+      wordleState.current = wordleState.current.slice(0, -1);
+      const col = wordleState.current.length;
+      const cell = document.getElementById(`wc-${wordleState.tries}-${col}`);
+      cell.textContent = ''; cell.classList.remove('filled');
+    }
+    return;
+  }
+  if (k === 'ENTER') {
+    if (wordleState.current.length !== len) { shakeRow(wordleState.tries); return; }
+    submitWordleGuess(); return;
+  }
+  if (wordleState.current.length < len && /^[a-z]$/.test(k)) {
+    const col = wordleState.current.length;
+    wordleState.current += k;
+    const cell = document.getElementById(`wc-${wordleState.tries}-${col}`);
+    cell.textContent = k.toUpperCase(); cell.classList.add('filled');
+  }
+}
+function shakeRow(r) {
+  const row = document.getElementById(`wr-${r}`);
+  row.style.animation = 'shake 0.3s'; setTimeout(() => row.style.animation = '', 350);
+}
+function submitWordleGuess() {
+  const guess = wordleState.current;
+  const target = wordleState.targets[wordleState.round].rom.toLowerCase();
+  const row = wordleState.tries;
+  const len = target.length;
+  const result = Array(len).fill('absent');
+  const tArr = target.split(''); const gArr = guess.split('');
+  gArr.forEach((ch, i) => { if (ch === tArr[i]) { result[i] = 'correct'; tArr[i] = null; } });
+  gArr.forEach((ch, i) => {
+    if (result[i] === 'correct') return;
+    const idx = tArr.indexOf(ch);
+    if (idx >= 0) { result[i] = 'present'; tArr[idx] = null; }
+  });
+  result.forEach((res, i) => {
+    setTimeout(() => {
+      const cell = document.getElementById(`wc-${row}-${i}`);
+      cell.classList.add(res);
+      const kk = document.getElementById(`wk-${gArr[i]}`);
+      if (kk) {
+        if (res === 'correct') kk.className = 'wk-key correct';
+        else if (res === 'present' && !kk.classList.contains('correct')) kk.className = 'wk-key present';
+        else if (res === 'absent' && !kk.classList.contains('correct') && !kk.classList.contains('present')) kk.className = 'wk-key absent';
+      }
+    }, i * 100);
+  });
+  const won = result.every(r => r === 'correct');
+  wordleState.tries++;
+  wordleState.current = '';
+  setTimeout(() => {
+    if (won) {
+      wordleState.score++;
+      triggerSuccess();
+      setTimeout(() => { wordleState.round++; startWordleRound(); }, 900);
+    } else if (wordleState.tries >= wordleState.maxTries) {
+      showToast(`Từ: ${wordleState.targets[wordleState.round].ko} (${target.toUpperCase()})`);
+      setTimeout(() => { wordleState.round++; startWordleRound(); }, 1200);
+    }
+  }, len * 100 + 300);
+}
+function showWordleEnd(score) {
+  saveScore('wordle', score);
+  const gc = document.getElementById('game-content');
+  gc.innerHTML = `<div class="result-banner anim-in">
+    <div class="rb-emoji">${score >= 8 ? '🏆' : score >= 5 ? '🌟' : '💪'}</div>
+    <div class="rb-title">${score >= 8 ? 'Excellent!' : score >= 5 ? 'Good job!' : 'Keep going!'}</div>
+    <div class="rb-sub">Score: <strong>${score}/10</strong> · Best: ${highScores['wordle'] || 0}/10</div>
+    <button class="primary-btn" style="margin-top:16px" onclick="startWordle()">Play again ↻</button>
+    <button class="primary-btn" style="margin-top:10px;background:var(--surface2);box-shadow:none;color:var(--text2);border:1px solid var(--border2)" onclick="goHome()">← Home</button>
+  </div>`;
+}
+
+// ══════════════════════════════════
+// TYPING RACE
+// ══════════════════════════════════
+let typingState = {};
+function startTypingRace() {
+  const allWords = [];
+  Object.values(db).forEach(d => d.words.forEach(w => allWords.push(w)));
+  typingState = { words: allWords.sort(() => Math.random() - 0.5), idx: 0, score: 0, timeLeft: 60, timer: null };
+  document.getElementById('game-title').textContent = '⚡ Typing Race';
+  showScreen('game-screen');
+  renderTypingUI();
+  startTypingTimer();
+}
+function renderTypingUI() {
+  const { words, idx, score, timeLeft } = typingState;
+  const w = words[idx % words.length];
+  document.getElementById('game-content').innerHTML = `
+    <div class="typing-score-row">
+      <div class="typing-score-card"><div class="tsc-num" id="tr-score">${score}</div><div class="tsc-label">Score</div></div>
+      <div class="typing-score-card"><div class="tsc-num typing-timer${timeLeft <= 10 ? ' warning' : ''}" id="tr-timer">${timeLeft}s</div><div class="tsc-label">Left</div></div>
+      <div class="typing-score-card"><div class="tsc-num" style="color:var(--neon)">${idx}</div><div class="tsc-label">Words</div></div>
+    </div>
+    <div class="typing-prompt">
+      <strong>${w.vi}</strong>
+      <span style="color:var(--text3);font-size:14px">${w.rom}</span>
+    </div>
+    <button style="margin-bottom:10px;background:rgba(232,160,32,0.1);border:1px solid rgba(232,160,32,0.3);border-radius:99px;padding:8px 18px;color:var(--accent);cursor:pointer;font-size:13px;" onclick="playSound('${w.ko}')">🔊 Listen</button>
+    <input class="typing-input" id="tr-input" placeholder="Gõ từ tiếng Hàn (phiên âm)..." autocomplete="off">
+    <div id="tr-feedback" style="min-height:24px;text-align:center;font-size:14px;margin-bottom:8px;"></div>
+    <button class="primary-btn" onclick="checkTypingAnswer()">Confirm →</button>`;
+  const inp = document.getElementById('tr-input');
+  inp.focus(); inp.onkeypress = e => { if (e.key === 'Enter') checkTypingAnswer(); };
+}
+function startTypingTimer() {
+  typingState.timer = setInterval(() => {
+    typingState.timeLeft--;
+    const el = document.getElementById('tr-timer');
+    if (el) { el.textContent = typingState.timeLeft + 's'; if (typingState.timeLeft <= 10) el.classList.add('warning'); }
+    if (typingState.timeLeft <= 0) { clearInterval(typingState.timer); showTypingResult(); }
+  }, 1000);
+}
+function checkTypingAnswer() {
+  const inp = document.getElementById('tr-input');
+  const ans = inp.value.trim().toLowerCase();
+  const word = typingState.words[typingState.idx % typingState.words.length];
+  const target = word.rom.toLowerCase();
+  if (ans === target) {
+    typingState.score += 10; typingState.idx++;
+    document.getElementById('tr-feedback').innerHTML = `<span style="color:var(--green)">✓ Đúng! +10 — ${word.ko}</span>`;
+    playSound(word.ko); setTimeout(() => renderTypingUI(), 700);
+  } else {
+    document.getElementById('tr-feedback').innerHTML = `<span style="color:var(--red)">✗ Sai!</span> Đáp án: <strong style="color:var(--neon)">${word.ko}</strong> (${word.rom})`;
+    inp.style.borderColor = 'var(--red)';
+    setTimeout(() => { typingState.idx++; renderTypingUI(); }, 1400);
+  }
+}
+function showTypingResult() {
+  const { score, idx } = typingState;
+  saveScore('typing', score);
+  document.getElementById('game-content').innerHTML = `<div class="result-banner anim-in">
+    <div class="rb-emoji">${score >= 60 ? '🏆' : score >= 30 ? '🌟' : '💪'}</div>
+    <div class="rb-title">${score >= 60 ? 'Champion!' : score >= 30 ? 'Great job!' : 'Keep going!'}</div>
+    <div class="rb-sub">Score: <strong>${score}</strong> · Words: <strong>${idx}</strong> · Best: ${highScores['typing'] || 0}</div>
+    <button class="primary-btn" style="margin-top:16px" onclick="startTypingRace()">Play again ↻</button>
+    <button class="primary-btn" style="margin-top:10px;background:var(--surface2);box-shadow:none;color:var(--text2);border:1px solid var(--border2)" onclick="goHome()">← Home</button>
+  </div>`;
+}
+
+// ══════════════════════════════════
+// DICTATION GAME
+// ══════════════════════════════════
+function startListenGame() {
+  const allWords = [];
+  Object.values(db).forEach(d => d.words.forEach(w => allWords.push(w)));
+  const shuffled = allWords.sort(() => Math.random() - 0.5);
+  document.getElementById('game-title').textContent = '🎧 Dictation';
+  showScreen('game-screen');
+  runListenRound(shuffled, 0, 0);
+}
+function runListenRound(words, idx, score) {
+  if (idx >= Math.min(words.length, 10)) {
+    saveScore('dictation', score);
+    document.getElementById('game-content').innerHTML = `<div class="result-banner anim-in">
+      <div class="rb-emoji">${score >= 8 ? '🎧' : score >= 5 ? '👂' : '📻'}</div>
+      <div class="rb-title">${score}/10 correct</div>
+      <div class="rb-sub">${score >= 8 ? 'Great ears!' : 'Keep practicing!'} · Best: ${highScores['dictation'] || 0}/10</div>
+      <button class="primary-btn" style="margin-top:16px" onclick="startListenGame()">Play again ↻</button>
+      <button class="primary-btn" style="margin-top:10px;background:var(--surface2);box-shadow:none;color:var(--text2);border:1px solid var(--border2)" onclick="goHome()">← Home</button>
+    </div>`;
+    return;
+  }
+  const target = words[idx];
+  document.getElementById('game-content').innerHTML = `
+    <div style="text-align:center;margin-bottom:8px;color:var(--text3);font-size:12px;letter-spacing:2px;text-transform:uppercase">Round ${idx + 1}/10 · Score: ${score}</div>
+    <div class="typing-prompt" onclick="playSound('${target.ko}')" style="cursor:pointer;user-select:none;">
+      <strong style="font-size:40px;display:block;margin-bottom:8px;">🔊</strong>
+      <span style="font-size:14px;color:var(--text3)">Tap to listen again</span>
+    </div>
+    <button style="margin-bottom:16px;background:rgba(232,160,32,0.1);border:1px solid rgba(232,160,32,0.3);border-radius:99px;padding:8px 20px;color:var(--accent);cursor:pointer;font-size:13px;" onclick="playSound('${target.ko}')">🔄 Listen again</button>
+    <input class="typing-input" id="li-input" placeholder="Gõ từ tiếng Hàn bạn vừa nghe..." autocomplete="off" spellcheck="false">
+    <div id="li-feedback" style="min-height:28px;text-align:center;font-size:14px;margin-bottom:10px;font-family:'DM Mono',monospace;"></div>
+    <button class="primary-btn" style="width:100%;" onclick="checkListenTyping('${target.ko}','${target.rom}',${idx},${score},listenWords)">Confirm →</button>`;
+  window.listenWords = words;
+  const inp = document.getElementById('li-input');
+  inp.focus(); inp.onkeypress = e => { if (e.key === 'Enter') checkListenTyping(target.ko, target.rom, idx, score, words); };
+  setTimeout(() => playSound(target.ko), 400);
+}
+function checkListenTyping(cor, corRom, idx, score, words) {
+  const inp = document.getElementById('li-input');
+  const ans = inp.value.trim().toLowerCase();
+  const fb = document.getElementById('li-feedback');
+  inp.disabled = true;
+  if (ans === cor.toLowerCase() || ans === corRom.toLowerCase()) {
+    inp.style.borderColor = 'var(--green)';
+    fb.innerHTML = `<span style="color:var(--green)">✓ Đúng! +1</span>`;
+    triggerSuccess(); setTimeout(() => runListenRound(words, idx + 1, score + 1), 900);
+  } else {
+    inp.style.borderColor = 'var(--red)';
+    fb.innerHTML = `<span style="color:var(--red)">✗ Sai!</span> Đáp án: <strong style="color:var(--accent);font-size:16px;">${cor}</strong> (${corRom})`;
+    playSound(cor); setTimeout(() => runListenRound(words, idx + 1, score), 1800);
+  }
+}
+
+// ══════════════════════════════════
+// GUESS THE WORD (English def → pick word)
+// ══════════════════════════════════
+let meaningState = {};
+
+function startMeaningGame() {
+  const allWords = [];
+  Object.values(db).forEach(d => d.words.forEach(w => { if (w.ko_def) allWords.push(w); }));
+  if (allWords.length < 4) { showToast('Not enough words with English definitions!'); return; }
+  const rounds = [...allWords].sort(() => Math.random() - 0.5).slice(0, Math.min(10, allWords.length));
+  meaningState = { rounds, allWords, idx: 0, score: 0 };
+  document.getElementById('game-title').textContent = '🧩 Guess the Word';
+  showScreen('game-screen');
+  runMeaningRound();
+}
+
+function runMeaningRound() {
+  const { rounds, allWords, idx, score } = meaningState;
+  if (idx >= rounds.length) {
+    saveScore('meaning', score);
+    document.getElementById('game-content').innerHTML = `<div class="result-banner anim-in">
+      <div class="rb-emoji">${score >= 8 ? '🧠' : score >= 5 ? '📖' : '💡'}</div>
+      <div class="rb-title">${score}/${rounds.length} correct</div>
+      <div class="rb-sub">${score >= 8 ? 'Vocabulary master!' : 'Keep learning!'} · Best: ${highScores['meaning'] || 0}</div>
+      <button class="primary-btn" style="margin-top:16px" onclick="startMeaningGame()">Play again ↻</button>
+      <button class="primary-btn" style="margin-top:10px;background:var(--surface2);box-shadow:none;color:var(--text2);border:1px solid var(--border2)" onclick="goHome()">← Home</button>
+    </div>`;
+    return;
+  }
+  const target = rounds[idx];
+  let opts = [target.ko];
+  const pool = allWords.filter(w => w.ko !== target.ko);
+  while (opts.length < Math.min(4, pool.length + 1)) {
+    const r = pool[Math.floor(Math.random() * pool.length)];
+    if (!opts.includes(r.ko)) opts.push(r.ko);
+  }
+  opts.sort(() => Math.random() - 0.5);
+  // Store opts in state so onclick can reference by index safely
+  meaningState.opts = opts;
+  meaningState.target = target.ko;
+
+  document.getElementById('game-content').innerHTML = `
+    <div style="text-align:center;margin-bottom:8px;color:var(--text3);font-size:12px;letter-spacing:2px;text-transform:uppercase">Round ${idx + 1}/${rounds.length} · Score: ${score}</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:20px;text-align:center;width:100%">
+      <div style="font-size:11px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:10px">${target.type}</div>
+      <div style="font-size:18px;font-weight:600;color:var(--text);line-height:1.6">"${target.ko_def}"</div>
+      <div style="margin-top:10px;font-size:13px;color:var(--text3)">${target.vi}</div>
+    </div>
+    <div id="meaning-opts" style="display:flex;flex-direction:column;gap:10px;width:100%">
+      ${opts.map((o, i) => `<button class="q-opt" onclick="checkMeaningAnswer(${i})">${o}</button>`).join('')}
+    </div>`;
+}
+
+function checkMeaningAnswer(optIdx) {
+  const sel = meaningState.opts[optIdx];
+  const cor = meaningState.target;
+  const allBtns = document.querySelectorAll('#meaning-opts .q-opt');
+  allBtns.forEach(b => b.disabled = true);
+  if (sel === cor) {
+    allBtns[optIdx].classList.add('correct');
+    playSound(cor); triggerSuccess();
+    meaningState.idx++; meaningState.score++;
+    setTimeout(() => runMeaningRound(), 1000);
+  } else {
+    allBtns[optIdx].classList.add('wrong');
+    allBtns.forEach(b => { if (b.textContent.trim() === cor) b.classList.add('correct'); });
+    meaningState.idx++;
+    setTimeout(() => runMeaningRound(), 1400);
+  }
+}
+
+// ══════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════
+function showDashboard() {
+  showScreen('dashboard-screen');
+  const grid = document.getElementById('dash-grid');
+  grid.innerHTML = '';
+  let total = 0, learned = 0, views_total = 0;
+  const wordStats = [];
+  Object.values(db).forEach(d => d.words.forEach(w => {
+    total++; const v = views[w.ko] || 0; views_total += v;
+    if (sr_data[w.ko] && sr_data[w.ko].interval > 0) learned++;
+    wordStats.push({ word: w, views: v });
+  }));
+  const streak = JSON.parse(localStorage.getItem('lexis_streak')) || { count: 0, best: 0 };
+  const notLearned = total - learned;
+  const r = 54, cx = 70, cy = 70, circ = 2 * Math.PI * r;
+  const learnedArc = (learned / (total || 1)) * circ;
+  const progressHtml = Object.keys(db).map(day => {
+    const words = db[day].words;
+    const pct = Math.round(words.filter(w => sr_data[w.ko] && sr_data[w.ko].interval > 0).length / words.length * 100);
+    return `<div class="pl-item"><div class="pl-top"><span class="pl-name">${customNames[day] || day}</span><span class="pl-pct">${pct}%</span></div><div class="pl-bar"><div class="pl-fill" style="width:${pct}%"></div></div></div>`;
+  }).join('');
+  const donutSvg = `<svg class="donut-svg" width="140" height="140" viewBox="0 0 140 140">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--surface3)" stroke-width="16"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="url(#dg)" stroke-width="16" stroke-dasharray="${learnedArc} ${circ-learnedArc}" stroke-dashoffset="${circ/4}" stroke-linecap="round"/>
+    <defs><linearGradient id="dg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#e8a020"/><stop offset="100%" style="stop-color:#f0c040"/></linearGradient></defs>
+    <text x="${cx}" y="${cy-4}" text-anchor="middle" fill="var(--text)" font-size="22" font-weight="700" font-family="Playfair Display">${learned}</text>
+    <text x="${cx}" y="${cy+16}" text-anchor="middle" fill="var(--text3)" font-size="11" font-family="DM Sans">/ ${total}</text>
+  </svg>`;
+  const topWords = [...wordStats].sort((a, b) => b.views - a.views).slice(0, 5);
+  const topHtml = topWords.map((ws, i) => `<div class="wl-item"><div class="wl-rank">#${i+1}</div><div><div class="wl-word">${ws.word.ko}</div><div class="wl-vi">${ws.word.vi}</div></div><div class="wl-badge">👁 ${ws.views}x</div></div>`).join('');
+  grid.innerHTML = `
+    <div class="dash-card"><div class="dash-card-title">Progress by folder</div><div class="progress-list">${progressHtml}</div></div>
+    <div class="dash-card"><div class="dash-card-title">Overview</div><div class="donut-wrap">${donutSvg}<div class="donut-legend">
+      <div class="dl-item"><div class="dl-dot" style="background:var(--accent)"></div>Learned: ${learned}</div>
+      <div class="dl-item"><div class="dl-dot" style="background:var(--surface3)"></div>Not yet: ${notLearned}</div>
+      <div class="dl-item"><div class="dl-dot" style="background:var(--gold)"></div>Streak: ${streak.count} days</div>
+      <div class="dl-item"><div class="dl-dot" style="background:var(--neon)"></div>Views: ${views_total}</div>
+    </div></div></div>
+    <div class="dash-card full"><div class="dash-card-title">Most viewed words</div><div class="word-list">${topHtml || '<div style="color:var(--text3);font-size:14px">No data yet</div>'}</div></div>`;
+}
+
+// ══════════════════════════════════
+// FX
+// ══════════════════════════════════
+function triggerSuccess() {
+  confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 }, colors: ['#e8a020','#f0c040','#ffd166','#ff9940','#ffffff'] });
+}
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border2);padding:12px 20px;border-radius:10px;font-size:14px;color:var(--text);z-index:9000;animation:fadeUp 0.3s ease;white-space:nowrap;`;
+  t.textContent = msg; document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// ══════════════════════════════════
+// DARK / LIGHT MODE
+// ══════════════════════════════════
+function toggleDark() {
+  document.body.classList.toggle('light-mode');
+  const isLight = document.body.classList.contains('light-mode');
+  document.getElementById('dark-btn').textContent = isLight ? '🌙' : '☀️';
+  localStorage.setItem('lexis_light', isLight);
+}
+const lightStyle = document.createElement('style');
+lightStyle.textContent = `body.light-mode{--bg:#fdf8f0;--surface:#fff;--surface2:#f5ede0;--surface3:#ede0cc;--border:rgba(180,120,20,0.1);--border2:rgba(180,120,20,0.2);--text:#2a1f0a;--text2:#7a5a30;--text3:#b09060;}`;
+document.head.appendChild(lightStyle);
+
+// ══════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ══════════════════════════════════
+document.addEventListener('keydown', e => {
+  const detail = document.getElementById('detail-screen');
+  if (!detail.classList.contains('active')) return;
+  const study = document.getElementById('study-tab');
+  if (study.style.display === 'none') return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+  if (e.code === 'Space' || e.key === 'ArrowUp') { e.preventDefault(); flipCard(); }
+  else if (e.key === 'ArrowLeft') moveCard(-1);
+  else if (e.key === 'ArrowRight') moveCard(1);
+  else if (isFlipped) {
+    if (e.key === '1') submitSR(0);
+    else if (e.key === '2') submitSR(1);
+    else if (e.key === '3') submitSR(2);
+    else if (e.key === '4') submitSR(3);
+  }
+});
+
+// ══════════════════════════════════
+// INIT
+// ══════════════════════════════════
+if (localStorage.getItem('lexis_light') === 'true') { document.body.classList.add('light-mode'); document.getElementById('dark-btn').textContent = '🌙'; }
+displayStreak();
+renderStats();
+renderFolders();
+renderHeatmap();
+renderGameBests();
+
+        // ══════════════════════════════════════
+        // CLOUD SYNC — Study Corner (shared Gist)
+        // ══════════════════════════════════════
+        const SC_TOKEN_KEY = 'SC_Token';
+        const SC_GIST_KEY  = 'SC_GistId';
+        const SC_FILE      = 'kor_data.json';
+        let scToken  = localStorage.getItem(SC_TOKEN_KEY) || '';
+        let scGistId = localStorage.getItem(SC_GIST_KEY)  || '';
+        let scSyncTimer = null;
+
+        function scSetStatus(state, label) {
+            const d = document.getElementById('scDot');
+            const l = document.getElementById('scLabel');
+            if (d) d.className = 'sc-dot ' + state;
+            if (l) l.textContent = label;
+        }
+        function scOpenModal() {
+            document.getElementById('scTokenInput').value = scToken;
+            document.getElementById('scGistInput').value  = scGistId;
+            document.getElementById('scModal').style.display = 'flex';
+        }
+        function scCloseModal() {
+            document.getElementById('scModal').style.display = 'none';
+        }
+        document.getElementById('scModal').addEventListener('click', e => {
+            if (e.target === document.getElementById('scModal')) scCloseModal();
+        });
+        async function scSaveConfig() {
+            const tok = document.getElementById('scTokenInput').value.trim();
+            const gid = document.getElementById('scGistInput').value.trim();
+            if (!tok) { alert('Vui lòng nhập GitHub Token!'); return; }
+            scToken  = tok; scGistId = gid;
+            localStorage.setItem(SC_TOKEN_KEY, tok);
+            scSetStatus('syncing', 'Đang kết nối...');
+            scCloseModal();
+            if (!gid) {
+                await scCreateGist();
+            } else {
+                localStorage.setItem(SC_GIST_KEY, gid);
+                await scPull();
+            }
+        }
+        async function scCreateGist() {
+            try {
+                const payload = {};
+            payload['lexis_sr'] = localStorage.getItem('lexis_sr') || '{}';
+            payload['lexis_views'] = localStorage.getItem('lexis_views') || '{}';
+            payload['lexis_names'] = localStorage.getItem('lexis_names') || '{}';
+            payload['lexis_descs'] = localStorage.getItem('lexis_descs') || '{}';
+            payload['lexis_activity'] = localStorage.getItem('lexis_activity') || '{}';
+            payload['lexis_scores'] = localStorage.getItem('lexis_scores') || '{}';
+            payload['lexis_streak'] = localStorage.getItem('lexis_streak') || '{}';
+                const res = await fetch('https://api.github.com/gists', {
+                    method: 'POST',
+                    headers: { 'Authorization': `token ${scToken}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        description: 'StudyCorner - kor_data.json',
+                        public: false,
+                        files: { [SC_FILE]: { content: JSON.stringify(payload) } }
+                    })
+                });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                scGistId = data.id;
+                localStorage.setItem(SC_GIST_KEY, scGistId);
+                scSetStatus('synced', 'Đã tạo ✓');
+                setTimeout(() => alert(`✅ Gist đã tạo!\n\nGist ID: ${scGistId}\n\nDùng ID này cho tất cả các trang khác.`), 200);
+            } catch(e) {
+                scSetStatus('error', 'Lỗi!');
+                alert('❌ Không tạo được Gist. Kiểm tra lại token!');
+            }
+        }
+        async function scPush() {
+            if (!scToken || !scGistId) return;
+            scSetStatus('syncing', 'Saving...');
+            try {
+                const payload = {};
+            payload['lexis_sr'] = localStorage.getItem('lexis_sr') || '{}';
+            payload['lexis_views'] = localStorage.getItem('lexis_views') || '{}';
+            payload['lexis_names'] = localStorage.getItem('lexis_names') || '{}';
+            payload['lexis_descs'] = localStorage.getItem('lexis_descs') || '{}';
+            payload['lexis_activity'] = localStorage.getItem('lexis_activity') || '{}';
+            payload['lexis_scores'] = localStorage.getItem('lexis_scores') || '{}';
+            payload['lexis_streak'] = localStorage.getItem('lexis_streak') || '{}';
+                const res = await fetch(`https://api.github.com/gists/${scGistId}`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `token ${scToken}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ files: { [SC_FILE]: { content: JSON.stringify(payload) } } })
+                });
+                if (!res.ok) throw new Error();
+                const now = new Date();
+                scSetStatus('synced', `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`);
+            } catch(e) { scSetStatus('error', 'Sync lỗi'); }
+        }
+        async function scPull() {
+            if (!scToken || !scGistId) return;
+            scSetStatus('syncing', 'Loading...');
+            try {
+                const res = await fetch(`https://api.github.com/gists/${scGistId}`, {
+                    headers: { 'Authorization': `token ${scToken}` }
+                });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                const file = data.files[SC_FILE];
+                if (file && file.content) {
+                    const d = JSON.parse(file.content);
+            if (d['lexis_sr'] !== undefined) { localStorage.setItem('lexis_sr', typeof d['lexis_sr'] === 'string' ? d['lexis_sr'] : JSON.stringify(d['lexis_sr'])); }
+            if (d['lexis_views'] !== undefined) { localStorage.setItem('lexis_views', typeof d['lexis_views'] === 'string' ? d['lexis_views'] : JSON.stringify(d['lexis_views'])); }
+            if (d['lexis_names'] !== undefined) { localStorage.setItem('lexis_names', typeof d['lexis_names'] === 'string' ? d['lexis_names'] : JSON.stringify(d['lexis_names'])); }
+            if (d['lexis_descs'] !== undefined) { localStorage.setItem('lexis_descs', typeof d['lexis_descs'] === 'string' ? d['lexis_descs'] : JSON.stringify(d['lexis_descs'])); }
+            if (d['lexis_activity'] !== undefined) { localStorage.setItem('lexis_activity', typeof d['lexis_activity'] === 'string' ? d['lexis_activity'] : JSON.stringify(d['lexis_activity'])); }
+            if (d['lexis_scores'] !== undefined) { localStorage.setItem('lexis_scores', typeof d['lexis_scores'] === 'string' ? d['lexis_scores'] : JSON.stringify(d['lexis_scores'])); }
+            if (d['lexis_streak'] !== undefined) { localStorage.setItem('lexis_streak', typeof d['lexis_streak'] === 'string' ? d['lexis_streak'] : JSON.stringify(d['lexis_streak'])); }
+                    scSetStatus('synced', 'Synced ✓');
+                    location.reload();
+                } else {
+                    scSetStatus('synced', 'Gist trống');
+                }
+            } catch(e) { scSetStatus('error', 'Load lỗi'); }
+        }
+        function scSchedulePush() {
+            if (!scToken || !scGistId) return;
+            clearTimeout(scSyncTimer);
+            scSyncTimer = setTimeout(scPush, 2000);
+        }
+        // Init
+        if (scToken && scGistId) scPull();
+        else if (scToken) scSetStatus('error', 'Thiếu Gist ID');
+        else scSetStatus('', 'Offline');
+        // ══════════════════════════════════════
+        // END SYNC
+        // ══════════════════════════════════════
+</script>
+</body>
+</html>
