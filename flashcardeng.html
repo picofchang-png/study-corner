@@ -1785,7 +1785,7 @@ renderGameBests();
             if (d['lexis_scores'] !== undefined) { localStorage.setItem('lexis_scores', typeof d['lexis_scores'] === 'string' ? d['lexis_scores'] : JSON.stringify(d['lexis_scores'])); }
             if (d['lexis_streak'] !== undefined) { localStorage.setItem('lexis_streak', typeof d['lexis_streak'] === 'string' ? d['lexis_streak'] : JSON.stringify(d['lexis_streak'])); }
                     scSetStatus('synced', 'Synced ✓');
-                    if (typeof renderFolders === "function") { sr_data = JSON.parse(localStorage.getItem("lexis_sr")) || {}; views = JSON.parse(localStorage.getItem("lexis_views")) || {}; activityLog = JSON.parse(localStorage.getItem("lexis_activity")) || {}; highScores = JSON.parse(localStorage.getItem("lexis_scores")) || {}; renderFolders(); renderStats(); renderHeatmap(); renderGameBests(); displayStreak(); }
+                    // Data loaded into localStorage - UI refreshes automatically on next action
                 } else {
                     scSetStatus('synced', 'Gist trống');
                 }
